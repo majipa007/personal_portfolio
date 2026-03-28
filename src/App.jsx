@@ -91,24 +91,6 @@ const contactLinks = [
   { label: 'Phone', value: '+91 8921875723', href: 'tel:+918921875723' },
 ]
 
-const conceptIdeas = [
-  { id: 1, title: 'Token → Transformer Pipeline' },
-  { id: 2, title: 'Latency / Throughput City' },
-  { id: 3, title: 'Quantization Lattice' },
-  { id: 4, title: 'Kubernetes Service Mesh Orbit' },
-  { id: 5, title: 'Attention Matrix Wall' },
-  { id: 6, title: 'Document Intelligence Conveyor' },
-  { id: 7, title: 'Embedding Constellation Field' },
-  { id: 8, title: 'Edge Vision Frustum' },
-  { id: 9, title: 'Inference Torus Reactor' },
-  { id: 10, title: 'Hex Throughput Terrain' },
-  { id: 11, title: 'Sequence Wave Ribbons' },
-  { id: 12, title: 'Mixture-of-Experts Gates' },
-  { id: 13, title: 'Vector Index Rings' },
-  { id: 14, title: 'Cloud Rack Topology' },
-  { id: 15, title: 'Circuit Trace Intelligence' },
-]
-
 function NeuralBackground() {
   const canvasRef = useRef(null)
 
@@ -789,34 +771,133 @@ function ConceptCanvas({ variant }) {
       camera.position.set(0, 2.3, 5.8)
     }
 
-    if (variant === 15) {
-      const paths = []
-      for (let i = 0; i < 14; i += 1) {
-        const y = 1.5 - i * 0.2
-        const points = [
-          new THREE.Vector3(-2.8, y, 0),
-          new THREE.Vector3(-1.4, y, 0),
-          new THREE.Vector3(-1.4, y - 0.1, 0),
-          new THREE.Vector3(0.2, y - 0.1, 0),
-          new THREE.Vector3(0.2, y + 0.05, 0),
-          new THREE.Vector3(2.8, y + 0.05, 0),
-        ]
-        const geo = new THREE.BufferGeometry().setFromPoints(points)
-        const line = new THREE.Line(geo, new THREE.LineBasicMaterial({ color: '#2e2e2e' }))
-        group.add(line)
-        paths.push(line)
+    if (variant === 16) {
+      const tokenMaterial = new THREE.MeshStandardMaterial({ color: '#1a1a1a', emissive: '#2e2e2e', roughness: 0.85 })
+      const tokens = []
+      for (let i = 0; i < 12; i += 1) {
+        const token = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.18, 0.18), tokenMaterial)
+        token.position.set(-4.4 + i * 0.23, 1.35 - i * 0.2, (Math.random() - 0.5) * 0.3)
+        group.add(token)
+        tokens.push(token)
       }
-      const pulse = new THREE.Mesh(new THREE.SphereGeometry(0.05, 10, 10), new THREE.MeshBasicMaterial({ color: '#9f9f9f' }))
-      group.add(pulse)
-      updaters.push((t) => {
-        group.rotation.z = Math.sin(t * 0.4) * 0.03
-        const track = Math.floor((t * 1.4) % paths.length)
-        const pos = paths[track].geometry.attributes.position
-        const n = pos.count
-        const p = Math.floor((t * 16) % n)
-        pulse.position.set(pos.getX(p), pos.getY(p), 0)
+
+      const peLine = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(
+          Array.from({ length: 110 }, (_, i) => new THREE.Vector3(-4.6 + i * 0.055, -1.25 + Math.sin(i * 0.28) * 0.16, 0)),
+        ),
+        new THREE.LineBasicMaterial({ color: '#3a3a3a' }),
+      )
+      group.add(peLine)
+
+      const centers = [-2.6, -1.25, 0.1, 1.45, 2.8]
+      const blocks = []
+
+      centers.forEach((x, idx) => {
+        const block = new THREE.Group()
+        block.position.set(x, 0.1, 0)
+
+        const frame = new THREE.LineSegments(
+          new THREE.EdgesGeometry(new THREE.BoxGeometry(0.95, 3.0, 1.25)),
+          new THREE.LineBasicMaterial({ color: '#363636' }),
+        )
+        block.add(frame)
+
+        const mha = new THREE.Mesh(
+          new THREE.BoxGeometry(0.72, 0.95, 0.72),
+          new THREE.MeshStandardMaterial({ color: '#151515', emissive: '#222222', roughness: 0.9 }),
+        )
+        mha.position.y = 0.78
+        block.add(mha)
+
+        const ffn = new THREE.Mesh(
+          new THREE.BoxGeometry(0.72, 0.95, 0.72),
+          new THREE.MeshStandardMaterial({ color: '#141414', emissive: '#202020', roughness: 0.9 }),
+        )
+        ffn.position.y = -0.78
+        block.add(ffn)
+
+        const residual = new THREE.Line(
+          new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(-0.47, 1.35, 0),
+            new THREE.Vector3(0, 1.95, 0),
+            new THREE.Vector3(0.47, 1.35, 0),
+          ]),
+          new THREE.LineBasicMaterial({ color: '#2f2f2f' }),
+        )
+        block.add(residual)
+
+        const heads = []
+        for (let h = 0; h < 4; h += 1) {
+          const head = new THREE.Mesh(
+            new THREE.SphereGeometry(0.055, 10, 10),
+            new THREE.MeshBasicMaterial({ color: h % 2 ? '#8f8f8f' : '#6d6d6d' }),
+          )
+          head.position.set(-0.23 + h * 0.15, 0.78, 0.42)
+          block.add(head)
+          heads.push(head)
+        }
+
+        group.add(block)
+        blocks.push({ block, mha, ffn, heads, idx })
       })
-      camera.position.set(0, 1, 7)
+
+      for (let i = 0; i < centers.length - 1; i += 1) {
+        const wire = new THREE.Line(
+          new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(centers[i] + 0.48, 0.1, 0),
+            new THREE.Vector3(centers[i + 1] - 0.48, 0.1, 0),
+          ]),
+          new THREE.LineBasicMaterial({ color: '#292929' }),
+        )
+        group.add(wire)
+      }
+
+      const logits = []
+      for (let i = 0; i < 10; i += 1) {
+        const logit = new THREE.Mesh(
+          new THREE.BoxGeometry(0.11, 0.6 + Math.random() * 0.8, 0.11),
+          new THREE.MeshStandardMaterial({ color: '#1b1b1b', emissive: '#2a2a2a', roughness: 0.85 }),
+        )
+        logit.position.set(4.35, -1.1 + i * 0.24, (Math.random() - 0.5) * 0.42)
+        group.add(logit)
+        logits.push(logit)
+      }
+
+      const flow = new THREE.Mesh(
+        new THREE.SphereGeometry(0.065, 12, 12),
+        new THREE.MeshBasicMaterial({ color: '#9a9a9a', transparent: true, opacity: 0.85 }),
+      )
+      group.add(flow)
+
+      updaters.push((t) => {
+        group.rotation.y = Math.sin(t * 0.24) * 0.08
+        group.rotation.x = Math.sin(t * 0.16) * 0.03
+
+        tokens.forEach((token, i) => {
+          token.position.x = -4.6 + ((t * 0.82 + i * 0.2) % 2.4)
+          token.position.y = 1.35 - i * 0.2 + Math.sin(t * 1.9 + i) * 0.025
+        })
+
+        blocks.forEach(({ block, mha, ffn, heads, idx }) => {
+          const a = (Math.sin(t * 1.5 + idx * 0.7) + 1) / 2
+          mha.material.emissive.setScalar(0.1 + a * 0.3)
+          ffn.material.emissive.setScalar(0.08 + a * 0.24)
+          block.position.y = 0.1 + Math.sin(t * 0.8 + idx * 0.45) * 0.04
+          heads.forEach((head, h) => {
+            head.position.z = 0.42 + Math.sin(t * 2.4 + h + idx) * 0.08
+          })
+        })
+
+        logits.forEach((logit, i) => {
+          logit.scale.y = 0.8 + Math.max(0.05, Math.sin(t * 1.8 + i * 0.52) * 0.6 + 0.6)
+        })
+
+        const k = (t * 0.4) % 1
+        flow.position.lerpVectors(new THREE.Vector3(-4.6, 1.35, 0), new THREE.Vector3(4.1, 0.1, 0), k)
+        flow.material.opacity = 0.35 + Math.sin(t * 6.2) * 0.25 + 0.35
+      })
+
+      camera.position.set(0.35, 1.1, 10.2)
     }
 
     let raf = 0
@@ -1031,22 +1112,20 @@ function App() {
         <section id="concepts" className="section concepts">
           <div className="section-head reveal">
             <span className="section-label mono">00</span>
-            <h2>3D Hero Concepts (1 → 15)</h2>
+            <h2>Transformer Architecture (3D)</h2>
           </div>
           <p className="concept-intro reveal" data-delay="0.04">
-            15 quick prototypes in a 3×5 grid. Review and tell me exactly which one to keep as final hero.
+            A recognisable transformer model: token embeddings → positional encoding → stacked attention/FFN blocks → output logits.
           </p>
 
           <div className="concept-grid">
-            {conceptIdeas.map((concept, idx) => (
-              <article className="concept-card reveal" data-delay={0.04 + idx * 0.02} key={concept.id}>
-                <header>
-                  <span className="mono">{concept.id}</span>
-                  <h3>{concept.title}</h3>
-                </header>
-                <ConceptCanvas variant={concept.id} />
-              </article>
-            ))}
+            <article className="concept-card reveal" data-delay="0.06">
+              <header>
+                <span className="mono">MODEL</span>
+                <h3>Encoder-style Transformer Stack</h3>
+              </header>
+              <ConceptCanvas variant={16} />
+            </article>
           </div>
         </section>
 
