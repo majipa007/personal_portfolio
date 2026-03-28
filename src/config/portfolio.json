@@ -196,6 +196,8 @@
   "blog": {
     "sectionNumber": "05",
     "title": "Blog",
+    "mediumHandle": "@sulavstha007",
+    "mediumProfileUrl": "https://medium.com/@sulavstha007",
     "items": [
       {
         "title": "A Guide to Quantize YOLOv8 Object Detection Models Using ONNX",

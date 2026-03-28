@@ -353,7 +353,16 @@ function App() {
   const [repos, setRepos] = useState([])
   const [repoSource, setRepoSource] = useState('api')
   const [loadingRepos, setLoadingRepos] = useState(true)
+  const [blogPosts, setBlogPosts] = useState(blog.items || [])
   const [navSolid, setNavSolid] = useState(false)
+
+  const displayedBlogPosts = useMemo(() => {
+    const posts = [...(blogPosts || [])]
+    if (blog.mediumProfileUrl && !posts.some((p) => p.href === blog.mediumProfileUrl)) {
+      posts.push({ title: 'More writing on Medium', href: blog.mediumProfileUrl })
+    }
+    return posts
+  }, [blogPosts])
 
   const revealTargets = useMemo(
     () => [
@@ -384,6 +393,43 @@ function App() {
     }
 
     loadRepos()
+    return () => {
+      mounted = false
+    }
+  }, [])
+
+  useEffect(() => {
+    let mounted = true
+
+    const loadMediumPosts = async () => {
+      try {
+        if (!blog.mediumHandle) return
+        const feedUrl = `https://medium.com/feed/${blog.mediumHandle}`
+        const endpoint = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`
+        const response = await fetch(endpoint)
+        if (!response.ok) return
+
+        const payload = await response.json()
+        if (!payload?.items?.length) return
+
+        const posts = payload.items
+          .map((item) => ({
+            title: item.title,
+            href: item.link,
+            pubDate: item.pubDate,
+          }))
+          .sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime())
+
+        if (mounted && posts.length) {
+          setBlogPosts(posts)
+        }
+      } catch {
+        // keep configured fallback items
+      }
+    }
+
+    loadMediumPosts()
+
     return () => {
       mounted = false
     }
@@ -658,7 +704,7 @@ function App() {
             <h2>{blog.title}</h2>
           </div>
           <div className="blog-list">
-            {blog.items.map((item, idx) => (
+            {displayedBlogPosts.map((item, idx) => (
               <a
                 key={item.title}
                 className="blog-item reveal left-reveal"
