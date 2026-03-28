@@ -73,38 +73,34 @@
     "groups": [
       {
         "name": "Languages",
-        "items": ["Python", "Java", "JavaScript", "SQL"]
+        "items": ["Python", "Go", "SQL"]
       },
       {
         "name": "AI/ML",
-        "items": [
-          "PyTorch",
-          "TensorFlow/Keras",
-          "Scikit-learn",
-          "YOLOv8",
-          "OpenCV",
-          "MediaPipe",
-          "ONNX Runtime",
-          "NumPy",
-          "Pandas"
-        ]
+        "items": ["YOLOv8", "OpenCV", "MediaPipe", "ONNX Runtime", "NumPy", "Pandas"]
       },
       {
         "name": "LLM/NLP",
-        "items": ["LangChain", "Hugging Face Transformers", "Azure OpenAI", "Prompt Engineering"]
+        "items": [
+          "LangChain",
+          "Hugging Face Transformers",
+          "Azure OpenAI",
+          "Microsoft Foundry",
+          "vLLM",
+          "Ollama",
+          "Prompt Engineering"
+        ]
       },
       {
         "name": "Infrastructure",
         "items": [
           "Docker",
-          "AKS/Kubernetes",
           "FastAPI",
           "PostgreSQL",
           "CosmosDB",
           "Redis",
-          "Apache Airflow",
-          "dbt",
-          "Azure Service Bus"
+          "Azure Service Bus",
+          "Azure Deployment Services"
         ]
       }
     ]

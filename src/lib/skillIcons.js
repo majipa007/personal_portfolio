@@ -1,34 +1,25 @@
 import {
-  siApacheairflow,
   siDocker,
   siFastapi,
+  siGo,
   siHuggingface,
-  siJavascript,
-  siKubernetes,
   siLangchain,
   siMediapipe,
   siNumpy,
+  siOllama,
   siOnnx,
   siOpencv,
-  siOpenjdk,
   siPandas,
   siPostgresql,
   siPython,
-  siPytorch,
   siRedis,
-  siScikitlearn,
-  siTensorflow,
   siYolo,
 } from 'simple-icons'
 
 const skillIcons = {
   Python: siPython,
-  Java: siOpenjdk,
-  JavaScript: siJavascript,
+  Go: siGo,
   SQL: siPostgresql,
-  PyTorch: siPytorch,
-  'TensorFlow/Keras': siTensorflow,
-  'Scikit-learn': siScikitlearn,
   YOLOv8: siYolo,
   OpenCV: siOpencv,
   MediaPipe: siMediapipe,
@@ -37,20 +28,21 @@ const skillIcons = {
   Pandas: siPandas,
   LangChain: siLangchain,
   'Hugging Face Transformers': siHuggingface,
+  Ollama: siOllama,
   Docker: siDocker,
-  'AKS/Kubernetes': siKubernetes,
   FastAPI: siFastapi,
   PostgreSQL: siPostgresql,
   Redis: siRedis,
-  'Apache Airflow': siApacheairflow,
 }
 
 const fallbackLabels = {
   'Azure OpenAI': 'AO',
+  'Microsoft Foundry': 'MF',
+  vLLM: 'vLLM',
   'Prompt Engineering': 'PE',
   CosmosDB: 'CDB',
-  dbt: 'DBT',
   'Azure Service Bus': 'ASB',
+  'Azure Deployment Services': 'ADS',
 }
 
 export function getSkillIcon(skill) {
