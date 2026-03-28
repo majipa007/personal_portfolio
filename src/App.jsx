@@ -22,10 +22,10 @@ function NeuralBackground() {
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000)
 
     const getSceneOffsetX = () => {
-      if (window.innerWidth >= 1280) return 6.2
-      if (window.innerWidth >= 1024) return 5.2
-      if (window.innerWidth >= 760) return 3.4
-      return 1.2
+      if (window.innerWidth >= 1280) return 8
+      if (window.innerWidth >= 1024) return 6.7
+      if (window.innerWidth >= 760) return 4.5
+      return 2
     }
 
     let sceneOffsetX = getSceneOffsetX()
