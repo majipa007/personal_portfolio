@@ -332,6 +332,207 @@ function CustomCursor() {
   )
 }
 
+function ConceptCanvas({ variant }) {
+  const canvasRef = useRef(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const scene = new THREE.Scene()
+    const camera = new THREE.PerspectiveCamera(52, 1, 0.1, 100)
+    camera.position.set(0, 1.5, 6.5)
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+
+    const group = new THREE.Group()
+    scene.add(group)
+
+    const ambient = new THREE.AmbientLight(0x2f2f2f, 0.8)
+    const rim = new THREE.PointLight(0x5a5a5a, 0.5)
+    rim.position.set(4, 4, 4)
+    scene.add(ambient, rim)
+
+    const updaters = []
+
+    if (variant === 1) {
+      const slabMat = new THREE.MeshStandardMaterial({ color: '#151515', roughness: 0.8, metalness: 0.15 })
+      const slabs = [-1.5, 0.1, 1.7].map((x) => {
+        const slab = new THREE.Mesh(new THREE.BoxGeometry(1.1, 2.2, 2.1), slabMat)
+        slab.position.set(x, 0.8, 0)
+        slab.scale.set(1, 1, 0.45)
+        group.add(slab)
+        return slab
+      })
+
+      slabs.forEach((slab) => {
+        const edges = new THREE.LineSegments(
+          new THREE.EdgesGeometry(slab.geometry),
+          new THREE.LineBasicMaterial({ color: '#333333', transparent: true, opacity: 0.9 }),
+        )
+        edges.position.copy(slab.position)
+        edges.scale.copy(slab.scale)
+        group.add(edges)
+      })
+
+      const lane = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(-3.4, 0.8, 0),
+          new THREE.Vector3(3.2, 0.8, 0),
+        ]),
+        new THREE.LineBasicMaterial({ color: '#212121' }),
+      )
+      group.add(lane)
+
+      const tokenMat = new THREE.MeshBasicMaterial({ color: '#8e8e8e' })
+      const tokens = Array.from({ length: 18 }, (_, i) => {
+        const token = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 0.12), tokenMat)
+        token.position.set(-3.5 - i * 0.28, 0.8 + (Math.random() - 0.5) * 0.45, (Math.random() - 0.5) * 0.55)
+        group.add(token)
+        return token
+      })
+
+      const burst = new THREE.Mesh(
+        new THREE.SphereGeometry(0.06, 10, 10),
+        new THREE.MeshBasicMaterial({ color: '#9a9a9a', transparent: true, opacity: 0 }),
+      )
+      burst.position.set(2.6, 0.8, 0)
+      group.add(burst)
+
+      updaters.push((t) => {
+        tokens.forEach((token, idx) => {
+          const speed = 0.52 + (idx % 4) * 0.04
+          const x = ((t * speed + idx * 0.32) % 7.2) - 3.6
+          token.position.x = x
+          token.position.y = 0.8 + Math.sin(t * 2 + idx) * 0.16
+          token.material.opacity = 0.45 + Math.max(0, (x + 1.8) / 3.8) * 0.55
+        })
+
+        const pulse = (Math.sin(t * 1.9) + 1) / 2
+        burst.material.opacity = pulse > 0.86 ? (pulse - 0.86) * 7 : 0
+        burst.scale.setScalar(1 + pulse * 1.5)
+      })
+    }
+
+    if (variant === 2) {
+      const bars = []
+      const geo = new THREE.BoxGeometry(0.22, 1, 0.22)
+      for (let x = -2.6; x <= 2.6; x += 0.33) {
+        for (let z = -1.8; z <= 1.8; z += 0.33) {
+          const mat = new THREE.MeshStandardMaterial({ color: '#171717', emissive: '#222222', roughness: 0.85 })
+          const bar = new THREE.Mesh(geo, mat)
+          bar.position.set(x, 0.2, z)
+          const seed = Math.random() * 10
+          const amp = 0.35 + Math.random() * 1.1
+          group.add(bar)
+          bars.push({ bar, seed, amp })
+        }
+      }
+
+      const grid = new THREE.GridHelper(6, 22, '#222222', '#141414')
+      grid.position.y = -0.34
+      group.add(grid)
+
+      updaters.push((t) => {
+        bars.forEach((entry, i) => {
+          const spike = Math.max(0, Math.sin(t * 1.4 + entry.seed + i * 0.02))
+          const h = 0.2 + Math.abs(Math.sin(t * 0.55 + entry.seed)) * entry.amp + spike * 0.75
+          entry.bar.scale.y = h
+          entry.bar.position.y = h * 0.5 - 0.25
+          const dim = Math.min(0.26 + h * 0.11, 0.55)
+          entry.bar.material.emissive.setScalar(dim)
+        })
+      })
+
+      group.rotation.x = -0.22
+      group.rotation.y = 0.45
+      camera.position.set(0.1, 2.4, 6.3)
+    }
+
+    if (variant === 3) {
+      const shells = [
+        { scale: 1.65, color: '#252525' },
+        { scale: 1.25, color: '#2f2f2f' },
+        { scale: 0.85, color: '#3a3a3a' },
+      ]
+
+      shells.forEach((shell, index) => {
+        const mesh = new THREE.LineSegments(
+          new THREE.EdgesGeometry(new THREE.BoxGeometry(1.4, 1.4, 1.4)),
+          new THREE.LineBasicMaterial({ color: shell.color, transparent: true, opacity: 0.95 - index * 0.2 }),
+        )
+        mesh.scale.setScalar(shell.scale)
+        group.add(mesh)
+      })
+
+      const points = new THREE.Group()
+      for (let i = 0; i < 80; i += 1) {
+        const p = new THREE.Mesh(
+          new THREE.SphereGeometry(0.03, 8, 8),
+          new THREE.MeshBasicMaterial({ color: i % 7 === 0 ? '#8f8f8f' : '#4a4a4a' }),
+        )
+        p.position.set((Math.random() - 0.5) * 2.1, (Math.random() - 0.5) * 2.1, (Math.random() - 0.5) * 2.1)
+        points.add(p)
+      }
+      group.add(points)
+
+      updaters.push((t) => {
+        group.rotation.y = t * 0.33
+        group.rotation.x = Math.sin(t * 0.32) * 0.2
+        const wave = (Math.sin(t * 1.1) + 1) / 2
+        const qScale = 1.55 - wave * 0.52
+        group.scale.set(qScale, 1.55 - wave * 0.34, qScale)
+        points.children.forEach((node, idx) => {
+          node.position.multiplyScalar(0.999 + Math.sin(t + idx * 0.18) * 0.0007)
+        })
+      })
+
+      camera.position.set(0, 0.8, 6.2)
+    }
+
+    let raf = 0
+    const clock = new THREE.Clock()
+
+    const onResize = () => {
+      const width = canvas.clientWidth
+      const height = canvas.clientHeight
+      if (!width || !height) return
+      camera.aspect = width / height
+      camera.updateProjectionMatrix()
+      renderer.setSize(width, height, false)
+    }
+
+    const resizeObserver = new ResizeObserver(onResize)
+    resizeObserver.observe(canvas)
+    onResize()
+
+    const tick = () => {
+      const elapsed = clock.getElapsedTime()
+      updaters.forEach((fn) => fn(elapsed))
+      renderer.render(scene, camera)
+      raf = window.requestAnimationFrame(tick)
+    }
+
+    tick()
+
+    return () => {
+      window.cancelAnimationFrame(raf)
+      resizeObserver.disconnect()
+      renderer.dispose()
+      scene.traverse((obj) => {
+        if (obj instanceof THREE.Mesh || obj instanceof THREE.Line || obj instanceof THREE.LineSegments) {
+          obj.geometry.dispose()
+          if (Array.isArray(obj.material)) obj.material.forEach((m) => m.dispose())
+          else obj.material.dispose()
+        }
+      })
+    }
+  }, [variant])
+
+  return <canvas ref={canvasRef} className="concept-canvas" aria-hidden="true" />
+}
+
 function App() {
   const [repos, setRepos] = useState([])
   const [repoSource, setRepoSource] = useState('api')
@@ -340,6 +541,7 @@ function App() {
 
   const revealTargets = useMemo(
     () => [
+      '#concepts .reveal',
       '#about .reveal',
       '#experience .reveal',
       '#skills .reveal',
@@ -495,6 +697,42 @@ function App() {
           <div className="scroll-hint mono">
             <span className="line" />
             scroll
+          </div>
+        </section>
+
+        <section id="concepts" className="section concepts">
+          <div className="section-head reveal">
+            <span className="section-label mono">00</span>
+            <h2>3D Hero Concepts (1, 2, 3)</h2>
+          </div>
+          <p className="concept-intro reveal" data-delay="0.04">
+            Quick side-by-side prototypes. Pick one and I&apos;ll polish it into the final hero.
+          </p>
+
+          <div className="concept-grid">
+            <article className="concept-card reveal" data-delay="0.06">
+              <header>
+                <span className="mono">1</span>
+                <h3>Token → Transformer Pipeline</h3>
+              </header>
+              <ConceptCanvas variant={1} />
+            </article>
+
+            <article className="concept-card reveal" data-delay="0.1">
+              <header>
+                <span className="mono">2</span>
+                <h3>Latency / Throughput City</h3>
+              </header>
+              <ConceptCanvas variant={2} />
+            </article>
+
+            <article className="concept-card reveal" data-delay="0.14">
+              <header>
+                <span className="mono">3</span>
+                <h3>Quantization Lattice</h3>
+              </header>
+              <ConceptCanvas variant={3} />
+            </article>
           </div>
         </section>
 
