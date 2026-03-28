@@ -29,7 +29,7 @@ function NeuralBackground() {
     }
 
     let sceneOffsetX = getSceneOffsetX()
-    camera.position.set(sceneOffsetX, 0, 28)
+    camera.position.set(0, 0, 28)
 
     const rig = new THREE.Group()
     rig.position.x = sceneOffsetX
@@ -210,10 +210,10 @@ function NeuralBackground() {
       lastTs = ts
       camTime += dt * 0.001
 
-      camera.position.x += (sceneOffsetX + mouseX * 2.8 - camera.position.x) * 0.04
+      camera.position.x += (mouseX * 2.2 - camera.position.x) * 0.04
       camera.position.y += (-mouseY * 2 - camera.position.y) * 0.04
       camera.position.z = 28 + Math.sin(camTime * 0.18) * 0.8
-      camera.lookAt(sceneOffsetX, 0, 0)
+      camera.lookAt(0, 0, 0)
 
       rig.rotation.y = Math.sin(camTime * 0.08) * 0.06
       rig.rotation.x = Math.cos(camTime * 0.06) * 0.03
