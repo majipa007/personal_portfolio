@@ -91,6 +91,24 @@ const contactLinks = [
   { label: 'Phone', value: '+91 8921875723', href: 'tel:+918921875723' },
 ]
 
+const conceptIdeas = [
+  { id: 1, title: 'Token → Transformer Pipeline' },
+  { id: 2, title: 'Latency / Throughput City' },
+  { id: 3, title: 'Quantization Lattice' },
+  { id: 4, title: 'Kubernetes Service Mesh Orbit' },
+  { id: 5, title: 'Attention Matrix Wall' },
+  { id: 6, title: 'Document Intelligence Conveyor' },
+  { id: 7, title: 'Embedding Constellation Field' },
+  { id: 8, title: 'Edge Vision Frustum' },
+  { id: 9, title: 'Inference Torus Reactor' },
+  { id: 10, title: 'Hex Throughput Terrain' },
+  { id: 11, title: 'Sequence Wave Ribbons' },
+  { id: 12, title: 'Mixture-of-Experts Gates' },
+  { id: 13, title: 'Vector Index Rings' },
+  { id: 14, title: 'Cloud Rack Topology' },
+  { id: 15, title: 'Circuit Trace Intelligence' },
+]
+
 function NeuralBackground() {
   const canvasRef = useRef(null)
 
@@ -491,6 +509,316 @@ function ConceptCanvas({ variant }) {
       camera.position.set(0, 0.8, 6.2)
     }
 
+    if (variant === 4) {
+      const hubs = []
+      const hubMat = new THREE.MeshStandardMaterial({ color: '#202020', emissive: '#2c2c2c', roughness: 0.85 })
+      const ringCount = 8
+      for (let i = 0; i < ringCount; i += 1) {
+        const a = (i / ringCount) * Math.PI * 2
+        const hub = new THREE.Mesh(new THREE.SphereGeometry(0.16, 14, 14), hubMat)
+        hub.position.set(Math.cos(a) * 2.1, Math.sin(a * 1.8) * 0.35, Math.sin(a) * 1.4)
+        group.add(hub)
+        hubs.push(hub)
+      }
+
+      const lines = []
+      for (let i = 0; i < hubs.length; i += 1) {
+        const next = (i + 1) % hubs.length
+        const g = new THREE.BufferGeometry().setFromPoints([hubs[i].position.clone(), hubs[next].position.clone()])
+        const l = new THREE.Line(g, new THREE.LineBasicMaterial({ color: '#2d2d2d' }))
+        group.add(l)
+        lines.push({ l, i, next })
+      }
+
+      const packet = new THREE.Mesh(new THREE.SphereGeometry(0.05, 10, 10), new THREE.MeshBasicMaterial({ color: '#9a9a9a' }))
+      group.add(packet)
+
+      updaters.push((t) => {
+        group.rotation.y = t * 0.28
+        const edge = lines[Math.floor((t * 1.4) % lines.length)]
+        const k = (t * 1.8) % 1
+        packet.position.lerpVectors(hubs[edge.i].position, hubs[edge.next].position, k)
+      })
+    }
+
+    if (variant === 5) {
+      const cells = []
+      const rows = 12
+      const cols = 16
+      for (let r = 0; r < rows; r += 1) {
+        for (let c = 0; c < cols; c += 1) {
+          const cell = new THREE.Mesh(
+            new THREE.BoxGeometry(0.19, 0.06, 0.19),
+            new THREE.MeshStandardMaterial({ color: '#161616', emissive: '#202020', roughness: 0.9 }),
+          )
+          cell.position.set((c - cols / 2) * 0.24, (r - rows / 2) * 0.1 + 0.8, 0)
+          group.add(cell)
+          cells.push({ cell, r, c })
+        }
+      }
+      group.rotation.x = -0.42
+      updaters.push((t) => {
+        cells.forEach(({ cell, r, c }) => {
+          const v = Math.max(0, Math.sin(t * 2.3 - c * 0.23 + r * 0.1))
+          cell.scale.y = 0.6 + v * 2.4
+          cell.material.emissive.setScalar(0.12 + v * 0.36)
+        })
+      })
+      camera.position.set(0, 1.4, 6)
+    }
+
+    if (variant === 6) {
+      const sheets = Array.from({ length: 9 }, (_, i) => {
+        const s = new THREE.Mesh(
+          new THREE.PlaneGeometry(1.1, 1.35),
+          new THREE.MeshStandardMaterial({ color: '#141414', side: THREE.DoubleSide, roughness: 0.95 }),
+        )
+        s.position.set(-2.8 - i * 0.7, 0.9, (Math.random() - 0.5) * 0.7)
+        group.add(s)
+        return s
+      })
+      const rails = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-3.8, 0.2, 0), new THREE.Vector3(3.4, 0.2, 0)]),
+        new THREE.LineBasicMaterial({ color: '#222222' }),
+      )
+      group.add(rails)
+      updaters.push((t) => {
+        sheets.forEach((s, i) => {
+          s.position.x = ((t * 1.1 + i * 0.65) % 7.6) - 3.8
+          s.rotation.y = Math.sin(t + i) * 0.1
+          s.rotation.x = Math.sin(t * 0.7 + i) * 0.06
+        })
+      })
+    }
+
+    if (variant === 7) {
+      const clusters = []
+      const mat = new THREE.MeshBasicMaterial({ color: '#4c4c4c' })
+      ;[[-1.4, 0.6, 0], [1.2, 1.1, 0.4], [0.2, -0.2, -0.6]].forEach((center) => {
+        const groupPts = new THREE.Group()
+        for (let i = 0; i < 35; i += 1) {
+          const p = new THREE.Mesh(new THREE.SphereGeometry(0.03, 8, 8), mat.clone())
+          p.position.set(
+            center[0] + (Math.random() - 0.5) * 1.1,
+            center[1] + (Math.random() - 0.5) * 0.9,
+            center[2] + (Math.random() - 0.5) * 1.1,
+          )
+          groupPts.add(p)
+        }
+        group.add(groupPts)
+        clusters.push(groupPts)
+      })
+      const probe = new THREE.Mesh(new THREE.SphereGeometry(0.06, 10, 10), new THREE.MeshBasicMaterial({ color: '#9d9d9d' }))
+      group.add(probe)
+      updaters.push((t) => {
+        probe.position.set(Math.sin(t) * 2.2, 0.5 + Math.sin(t * 1.8) * 0.8, Math.cos(t * 0.8) * 1.2)
+        clusters.forEach((c, idx) => {
+          c.rotation.y += 0.001 + idx * 0.0008
+        })
+      })
+    }
+
+    if (variant === 8) {
+      const frustum = new THREE.LineSegments(
+        new THREE.EdgesGeometry(new THREE.ConeGeometry(1.3, 2.8, 4, 1, true)),
+        new THREE.LineBasicMaterial({ color: '#353535' }),
+      )
+      frustum.rotation.x = Math.PI / 2
+      frustum.position.set(-1.2, 1, 0)
+      group.add(frustum)
+      const targets = []
+      for (let i = 0; i < 5; i += 1) {
+        const box = new THREE.LineSegments(
+          new THREE.EdgesGeometry(new THREE.BoxGeometry(0.45, 0.45, 0.45)),
+          new THREE.LineBasicMaterial({ color: '#5f5f5f' }),
+        )
+        box.position.set(0.8 + i * 0.55, 0.6 + (i % 2) * 0.5, (Math.random() - 0.5) * 1.2)
+        group.add(box)
+        targets.push(box)
+      }
+      updaters.push((t) => {
+        targets.forEach((box, i) => {
+          box.scale.setScalar(1 + Math.sin(t * 3 + i) * 0.12)
+          box.rotation.y = t * 0.4 + i * 0.2
+        })
+      })
+    }
+
+    if (variant === 9) {
+      const knots = []
+      for (let i = 0; i < 4; i += 1) {
+        const k = new THREE.Mesh(
+          new THREE.TorusKnotGeometry(0.5 + i * 0.08, 0.06, 120, 14),
+          new THREE.MeshStandardMaterial({ color: '#1c1c1c', emissive: '#2f2f2f', roughness: 0.75 }),
+        )
+        k.position.set((i - 1.5) * 0.7, 0.8 + (i % 2) * 0.35, 0)
+        group.add(k)
+        knots.push(k)
+      }
+      updaters.push((t) => {
+        knots.forEach((k, i) => {
+          k.rotation.x = t * (0.3 + i * 0.05)
+          k.rotation.y = t * (0.4 + i * 0.04)
+        })
+      })
+    }
+
+    if (variant === 10) {
+      const hexes = []
+      for (let i = -5; i <= 5; i += 1) {
+        for (let j = -3; j <= 3; j += 1) {
+          const hex = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.13, 0.13, 0.2, 6),
+            new THREE.MeshStandardMaterial({ color: '#191919', emissive: '#232323' }),
+          )
+          hex.position.set(i * 0.28 + (j % 2 ? 0.14 : 0), 0.2, j * 0.24)
+          group.add(hex)
+          hexes.push({ hex, i, j })
+        }
+      }
+      group.rotation.x = -0.35
+      updaters.push((t) => {
+        hexes.forEach(({ hex, i, j }) => {
+          const h = 0.35 + Math.max(0, Math.sin(t * 1.9 + i * 0.34 + j * 0.5)) * 0.95
+          hex.scale.y = h
+          hex.position.y = h * 0.2
+          hex.material.emissive.setScalar(0.12 + h * 0.1)
+        })
+      })
+      camera.position.set(0, 2.3, 6)
+    }
+
+    if (variant === 11) {
+      const waves = []
+      for (let i = 0; i < 5; i += 1) {
+        const pts = Array.from({ length: 40 }, (_, p) => new THREE.Vector3((p - 20) * 0.18, 0, (i - 2) * 0.4))
+        const geo = new THREE.BufferGeometry().setFromPoints(pts)
+        const line = new THREE.Line(geo, new THREE.LineBasicMaterial({ color: i % 2 ? '#3a3a3a' : '#5a5a5a' }))
+        group.add(line)
+        waves.push({ line, pts })
+      }
+      updaters.push((t) => {
+        waves.forEach(({ line, pts }, idx) => {
+          const pos = line.geometry.attributes.position
+          pts.forEach((p, i) => {
+            pos.setXYZ(i, p.x, Math.sin(t * 2 + i * 0.2 + idx) * 0.24, p.z)
+          })
+          pos.needsUpdate = true
+        })
+      })
+    }
+
+    if (variant === 12) {
+      const gates = []
+      for (let i = 0; i < 8; i += 1) {
+        const gate = new THREE.Mesh(
+          new THREE.BoxGeometry(0.38, 1.8, 0.38),
+          new THREE.MeshStandardMaterial({ color: '#151515', emissive: '#222222', roughness: 0.86 }),
+        )
+        gate.position.set((i - 3.5) * 0.55, 0.7, 0)
+        group.add(gate)
+        gates.push(gate)
+      }
+      const router = new THREE.Mesh(new THREE.SphereGeometry(0.08, 10, 10), new THREE.MeshBasicMaterial({ color: '#9e9e9e' }))
+      group.add(router)
+      updaters.push((t) => {
+        const selected = Math.floor((t * 1.5) % gates.length)
+        gates.forEach((gate, i) => {
+          gate.scale.y = i === selected ? 1.2 : 0.7
+          gate.material.emissive.setScalar(i === selected ? 0.45 : 0.18)
+        })
+        router.position.copy(gates[selected].position)
+        router.position.y = 1.7
+      })
+    }
+
+    if (variant === 13) {
+      const rings = []
+      for (let i = 0; i < 4; i += 1) {
+        const ring = new THREE.LineLoop(
+          new THREE.BufferGeometry().setFromPoints(
+            Array.from({ length: 100 }, (_, p) => {
+              const a = (p / 100) * Math.PI * 2
+              return new THREE.Vector3(Math.cos(a) * (0.8 + i * 0.45), Math.sin(a) * (0.4 + i * 0.18), 0)
+            }),
+          ),
+          new THREE.LineBasicMaterial({ color: '#2d2d2d' }),
+        )
+        ring.rotation.y = i * 0.55
+        group.add(ring)
+        rings.push(ring)
+      }
+      const q = new THREE.Mesh(new THREE.SphereGeometry(0.06, 10, 10), new THREE.MeshBasicMaterial({ color: '#9e9e9e' }))
+      group.add(q)
+      updaters.push((t) => {
+        rings.forEach((r, i) => {
+          r.rotation.z = t * (0.3 + i * 0.08)
+        })
+        q.position.set(Math.cos(t) * 1.4, Math.sin(t * 1.5) * 0.7 + 0.7, Math.sin(t) * 1.1)
+      })
+    }
+
+    if (variant === 14) {
+      const racks = []
+      for (let i = 0; i < 18; i += 1) {
+        const rack = new THREE.Mesh(
+          new THREE.BoxGeometry(0.32, 1.8 + (i % 4) * 0.2, 0.32),
+          new THREE.MeshStandardMaterial({ color: '#171717', emissive: '#222222' }),
+        )
+        rack.position.set((i % 6) * 0.5 - 1.25, 0.7, Math.floor(i / 6) * 0.6 - 0.6)
+        group.add(rack)
+        racks.push(rack)
+      }
+      const flow = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(-1.5, 0.2, -1),
+          new THREE.Vector3(1.5, 0.2, -1),
+          new THREE.Vector3(1.5, 0.2, 1),
+          new THREE.Vector3(-1.5, 0.2, 1),
+        ]),
+        new THREE.LineBasicMaterial({ color: '#4b4b4b' }),
+      )
+      group.add(flow)
+      updaters.push((t) => {
+        racks.forEach((r, i) => {
+          r.material.emissive.setScalar(0.08 + Math.max(0, Math.sin(t * 2 + i * 0.5)) * 0.32)
+        })
+      })
+      group.rotation.x = -0.2
+      group.rotation.y = 0.5
+      camera.position.set(0, 2.3, 5.8)
+    }
+
+    if (variant === 15) {
+      const paths = []
+      for (let i = 0; i < 14; i += 1) {
+        const y = 1.5 - i * 0.2
+        const points = [
+          new THREE.Vector3(-2.8, y, 0),
+          new THREE.Vector3(-1.4, y, 0),
+          new THREE.Vector3(-1.4, y - 0.1, 0),
+          new THREE.Vector3(0.2, y - 0.1, 0),
+          new THREE.Vector3(0.2, y + 0.05, 0),
+          new THREE.Vector3(2.8, y + 0.05, 0),
+        ]
+        const geo = new THREE.BufferGeometry().setFromPoints(points)
+        const line = new THREE.Line(geo, new THREE.LineBasicMaterial({ color: '#2e2e2e' }))
+        group.add(line)
+        paths.push(line)
+      }
+      const pulse = new THREE.Mesh(new THREE.SphereGeometry(0.05, 10, 10), new THREE.MeshBasicMaterial({ color: '#9f9f9f' }))
+      group.add(pulse)
+      updaters.push((t) => {
+        group.rotation.z = Math.sin(t * 0.4) * 0.03
+        const track = Math.floor((t * 1.4) % paths.length)
+        const pos = paths[track].geometry.attributes.position
+        const n = pos.count
+        const p = Math.floor((t * 16) % n)
+        pulse.position.set(pos.getX(p), pos.getY(p), 0)
+      })
+      camera.position.set(0, 1, 7)
+    }
+
     let raf = 0
     const clock = new THREE.Clock()
 
@@ -703,36 +1031,22 @@ function App() {
         <section id="concepts" className="section concepts">
           <div className="section-head reveal">
             <span className="section-label mono">00</span>
-            <h2>3D Hero Concepts (1, 2, 3)</h2>
+            <h2>3D Hero Concepts (1 → 15)</h2>
           </div>
           <p className="concept-intro reveal" data-delay="0.04">
-            Quick side-by-side prototypes. Pick one and I&apos;ll polish it into the final hero.
+            15 quick prototypes in a 3×5 grid. Review and tell me exactly which one to keep as final hero.
           </p>
 
           <div className="concept-grid">
-            <article className="concept-card reveal" data-delay="0.06">
-              <header>
-                <span className="mono">1</span>
-                <h3>Token → Transformer Pipeline</h3>
-              </header>
-              <ConceptCanvas variant={1} />
-            </article>
-
-            <article className="concept-card reveal" data-delay="0.1">
-              <header>
-                <span className="mono">2</span>
-                <h3>Latency / Throughput City</h3>
-              </header>
-              <ConceptCanvas variant={2} />
-            </article>
-
-            <article className="concept-card reveal" data-delay="0.14">
-              <header>
-                <span className="mono">3</span>
-                <h3>Quantization Lattice</h3>
-              </header>
-              <ConceptCanvas variant={3} />
-            </article>
+            {conceptIdeas.map((concept, idx) => (
+              <article className="concept-card reveal" data-delay={0.04 + idx * 0.02} key={concept.id}>
+                <header>
+                  <span className="mono">{concept.id}</span>
+                  <h3>{concept.title}</h3>
+                </header>
+                <ConceptCanvas variant={concept.id} />
+              </article>
+            ))}
           </div>
         </section>
 
