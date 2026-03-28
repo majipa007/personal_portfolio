@@ -23,7 +23,19 @@
   "about": {
     "sectionNumber": "01",
     "title": "About",
-    "bio": "I'm an AI & Data Science student at KPRIET, Coimbatore (CGPA 9.0/10) with production experience shipping AI systems — from document compliance pipelines processing hundreds of thousands of records, to real-time object detection at the edge. My focus is on LLM systems, inference optimization, and AI infrastructure. I like building things that run fast and scale, not just things that work.",
+    "bioParagraphs": [
+      "I work on building AI-driven systems for real-world workflows in a compliance-focused environment.",
+      "My work involves developing data validation pipelines, document processing systems, and internal automation tools powered by machine learning.",
+      "Over time, I’ve become more interested in what happens beyond model usage, how systems actually behave under load. Recently, I’ve been focusing on ML systems and LLM inference, working with Go to build backend services and gateways that handle request flow, concurrency, timeouts, and system limits."
+    ],
+    "interestsTitle": "I’m particularly interested in:",
+    "interests": [
+      "LLM serving and inference systems",
+      "Backend systems under real-world constraints",
+      "Batching, scheduling, and request control",
+      "Building reliable and cost-aware AI infrastructure"
+    ],
+    "closing": "Currently learning by building and breaking things, understanding failure modes, and improving how systems behave in practice.",
     "sidebarTitle": "Currently",
     "currently": [
       "Shipping LLM workflows on Azure",

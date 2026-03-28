@@ -408,7 +408,21 @@ function App() {
           </div>
           <div className="about-grid">
             <div className="about-copy reveal" data-delay="0.05">
-              <p>{about.bio}</p>
+              {about.bioParagraphs?.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
+
+              {about.interestsTitle ? <p className="about-interests-title">{about.interestsTitle}</p> : null}
+
+              {about.interests?.length ? (
+                <ul className="about-interests-list">
+                  {about.interests.map((interest) => (
+                    <li key={interest}>{interest}</li>
+                  ))}
+                </ul>
+              ) : null}
+
+              {about.closing ? <p>{about.closing}</p> : null}
             </div>
             <aside className="about-side reveal" data-delay="0.1">
               <h3 className="mono">{about.sidebarTitle}</h3>

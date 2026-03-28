@@ -333,10 +333,26 @@ main {
 }
 
 .about-copy p {
-  margin: 0;
+  margin: 0 0 14px;
   color: #c8c8c8;
   line-height: 1.85;
   font-size: 1rem;
+}
+
+.about-copy p:last-child {
+  margin-bottom: 0;
+}
+
+.about-interests-title {
+  margin-top: 4px;
+  color: #d5d5d5;
+}
+
+.about-interests-list {
+  margin: 0 0 14px;
+  padding-left: 20px;
+  color: #c8c8c8;
+  line-height: 1.85;
 }
 
 .about-side {
