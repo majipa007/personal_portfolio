@@ -22,10 +22,11 @@ function NeuralBackground() {
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000)
 
     const getSceneOffsetX = () => {
-      if (window.innerWidth >= 1280) return 8
-      if (window.innerWidth >= 1024) return 6.7
-      if (window.innerWidth >= 760) return 4.5
-      return 2
+      if (window.innerWidth >= 1440) return 13.5
+      if (window.innerWidth >= 1280) return 11.5
+      if (window.innerWidth >= 1024) return 9.2
+      if (window.innerWidth >= 760) return 6.2
+      return 3.2
     }
 
     let sceneOffsetX = getSceneOffsetX()
@@ -210,7 +211,7 @@ function NeuralBackground() {
       lastTs = ts
       camTime += dt * 0.001
 
-      camera.position.x += (mouseX * 2.2 - camera.position.x) * 0.04
+      camera.position.x += (mouseX * 1 - camera.position.x) * 0.04
       camera.position.y += (-mouseY * 2 - camera.position.y) * 0.04
       camera.position.z = 28 + Math.sin(camTime * 0.18) * 0.8
       camera.lookAt(0, 0, 0)
