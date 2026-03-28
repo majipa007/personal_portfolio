@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600&display=swap');
 
 :root {
   --bg: #0a0a0a;
@@ -314,9 +314,11 @@ main {
 
 .about-copy p {
   margin: 0 0 14px;
-  color: #c8c8c8;
-  line-height: 1.85;
-  font-size: 1rem;
+  color: #d4d4d4;
+  line-height: 1.82;
+  font-size: 1.03rem;
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 500;
 }
 
 .about-copy p:last-child {
@@ -325,14 +327,18 @@ main {
 
 .about-interests-title {
   margin-top: 4px;
-  color: #d5d5d5;
+  color: #e0e0e0;
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 600;
 }
 
 .about-interests-list {
   margin: 0 0 14px;
   padding-left: 20px;
-  color: #c8c8c8;
-  line-height: 1.85;
+  color: #d4d4d4;
+  line-height: 1.82;
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 500;
 }
 
 .about-side {
