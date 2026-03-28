@@ -3,93 +3,9 @@ import * as THREE from 'three'
 import gsap from 'gsap'
 import { fetchPortfolioRepos } from './lib/github'
 import { getSkillFallbackLabel, getSkillIcon } from './lib/skillIcons'
+import portfolioConfig from './config/portfolio.json'
 
-const navItems = [
-  { label: 'about', href: '#about' },
-  { label: 'experience', href: '#experience' },
-  { label: 'skills', href: '#skills' },
-  { label: 'projects', href: '#projects' },
-  { label: 'blog', href: '#blog' },
-  { label: 'contact', href: '#contact' },
-]
-
-const currentlyItems = [
-  'Shipping LLM workflows on Azure',
-  'Optimizing inference for edge and cloud',
-  'Designing scalable microservice AI systems',
-]
-
-const socialLinks = [
-  { label: 'GitHub', href: 'https://github.com/majipa007' },
-  { label: 'Medium', href: 'https://medium.com/@sulavstha007' },
-  { label: 'LinkedIn', href: 'https://linkedin.com/in/sulav-shrestha-16b1091bb' },
-  { label: 'Kaggle', href: 'https://kaggle.com/sulavshrestha007' },
-  { label: 'LeetCode', href: 'https://leetcode.com' },
-  { label: 'HackerRank', href: 'https://hackerrank.com' },
-]
-
-const experienceItems = [
-  {
-    company: 'InCorp',
-    role: 'AI & Data Engineer Intern',
-    period: 'Apr 2025 – Present (Onsite)',
-    points: [
-      'Built intelligent PDF-to-Excel extraction pipelines using Azure Document Intelligence + Azure OpenAI. Cut processing time from 1–2 hours to under 5 minutes.',
-      'Designed large-scale document compliance system across 6 microservices/AKS pods with Azure Service Bus, handling hundreds of thousands of documents with classification, verification, and validation.',
-      'Developed transaction risk workflows flagging duplicates, anomalies, and compliance violations with automated reporting.',
-      'Stack: FastAPI, CosmosDB, Redis, MS Graph API, SharePoint, Azure OpenAI, Azure Document Intelligence, AKS, HMAC-secured endpoints.',
-    ],
-  },
-  {
-    company: 'Sprhava (Germany, Remote)',
-    role: 'Jr. Data Scientist',
-    period: 'Jul 2024 – Nov 2024',
-    points: [
-      'Enhanced YOLOv8 obstacle tracking system; reduced false positives.',
-      'Replaced DeepSORT with ByteTrack — boosted FPS by 30% in dynamic envs.',
-      'Optimized system for cloud deployment.',
-      'Stack: YOLOv8, ByteTrack, Python, OpenCV, Git.',
-    ],
-  },
-]
-
-const skills = {
-  Languages: ['Python', 'Java', 'JavaScript', 'SQL'],
-  'AI/ML': [
-    'PyTorch',
-    'TensorFlow/Keras',
-    'Scikit-learn',
-    'YOLOv8',
-    'OpenCV',
-    'MediaPipe',
-    'ONNX Runtime',
-    'NumPy',
-    'Pandas',
-  ],
-  'LLM/NLP': ['LangChain', 'Hugging Face Transformers', 'Azure OpenAI', 'Prompt Engineering'],
-  Infrastructure: [
-    'Docker',
-    'AKS/Kubernetes',
-    'FastAPI',
-    'PostgreSQL',
-    'CosmosDB',
-    'Redis',
-    'Apache Airflow',
-    'dbt',
-    'Azure Service Bus',
-  ],
-}
-
-const contactLinks = [
-  { label: 'Email', value: 'sulavstha007@gmail.com', href: 'mailto:sulavstha007@gmail.com' },
-  { label: 'GitHub', value: 'github.com/majipa007', href: 'https://github.com/majipa007' },
-  {
-    label: 'LinkedIn',
-    value: 'sulav-shrestha-16b1091bb',
-    href: 'https://linkedin.com/in/sulav-shrestha-16b1091bb',
-  },
-  { label: 'Phone', value: '+91 8921875723', href: 'tel:+918921875723' },
-]
+const { navigation, hero, about, experience, skills, projects, blog, contact } = portfolioConfig
 
 function NeuralBackground() {
   const canvasRef = useRef(null)
@@ -246,11 +162,8 @@ function NeuralBackground() {
       scene.traverse((obj) => {
         if (obj instanceof THREE.Mesh || obj instanceof THREE.Line) {
           obj.geometry.dispose()
-          if (Array.isArray(obj.material)) {
-            obj.material.forEach((mat) => mat.dispose())
-          } else {
-            obj.material.dispose()
-          }
+          if (Array.isArray(obj.material)) obj.material.forEach((mat) => mat.dispose())
+          else obj.material.dispose()
         }
       })
     }
@@ -283,18 +196,19 @@ function CustomCursor() {
       ring.style.opacity = '1'
     }
 
-    const setHover = (state) => {
-      hovering = state
-    }
-
     const hoverables = document.querySelectorAll('a, button, [data-hoverable="true"]')
-    const hoverHandlers = []
+    const handlers = []
+
     hoverables.forEach((el) => {
-      const onEnter = () => setHover(true)
-      const onLeave = () => setHover(false)
+      const onEnter = () => {
+        hovering = true
+      }
+      const onLeave = () => {
+        hovering = false
+      }
       el.addEventListener('mouseenter', onEnter)
       el.addEventListener('mouseleave', onLeave)
-      hoverHandlers.push({ el, onEnter, onLeave })
+      handlers.push({ el, onEnter, onLeave })
     })
 
     let raf = 0
@@ -316,7 +230,7 @@ function CustomCursor() {
 
     return () => {
       window.removeEventListener('pointermove', onMove)
-      hoverHandlers.forEach(({ el, onEnter, onLeave }) => {
+      handlers.forEach(({ el, onEnter, onLeave }) => {
         el.removeEventListener('mouseenter', onEnter)
         el.removeEventListener('mouseleave', onLeave)
       })
@@ -354,12 +268,18 @@ function App() {
     let mounted = true
     const loadRepos = async () => {
       setLoadingRepos(true)
-      const result = await fetchPortfolioRepos()
+      const result = await fetchPortfolioRepos({
+        url: projects.apiUrl,
+        fallbackRepos: projects.fallbackRepos,
+        limit: projects.limit,
+        emptyDescription: projects.emptyDescription,
+      })
       if (!mounted) return
       setRepos(result.repos)
       setRepoSource(result.source)
       setLoadingRepos(false)
     }
+
     loadRepos()
     return () => {
       mounted = false
@@ -374,9 +294,7 @@ function App() {
       .fromTo('.hero-tagline', { y: 24, opacity: 0 }, { y: 0, opacity: 1 }, '+=0.15')
       .fromTo('.hero-actions .btn', { y: 24, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.15 }, '+=0.15')
 
-    return () => {
-      timeline.kill()
-    }
+    return () => timeline.kill()
   }, [])
 
   useEffect(() => {
@@ -385,14 +303,7 @@ function App() {
         entries.forEach((entry) => {
           if (!entry.isIntersecting) return
           const delay = Number(entry.target.getAttribute('data-delay') || 0)
-          gsap.to(entry.target, {
-            opacity: 1,
-            y: 0,
-            x: 0,
-            duration: 0.7,
-            delay,
-            ease: 'power2.out',
-          })
+          gsap.to(entry.target, { opacity: 1, y: 0, x: 0, duration: 0.7, delay, ease: 'power2.out' })
           observer.unobserve(entry.target)
         })
       },
@@ -411,9 +322,7 @@ function App() {
   }, [revealTargets])
 
   useEffect(() => {
-    const onScroll = () => {
-      setNavSolid(window.scrollY > 60)
-    }
+    const onScroll = () => setNavSolid(window.scrollY > 60)
     onScroll()
     window.addEventListener('scroll', onScroll)
     return () => window.removeEventListener('scroll', onScroll)
@@ -422,8 +331,8 @@ function App() {
   useEffect(() => {
     const letters = 'abcdefghijklmnopqrstuvwxyz'
     const navLinks = document.querySelectorAll('.nav-link')
-
     const handlers = []
+
     navLinks.forEach((el) => {
       const original = el.dataset.text || ''
       const onEnter = () => {
@@ -451,9 +360,7 @@ function App() {
       handlers.push({ el, onEnter })
     })
 
-    return () => {
-      handlers.forEach(({ el, onEnter }) => el.removeEventListener('mouseenter', onEnter))
-    }
+    return () => handlers.forEach(({ el, onEnter }) => el.removeEventListener('mouseenter', onEnter))
   }, [])
 
   return (
@@ -461,10 +368,10 @@ function App() {
       <CustomCursor />
       <header className={`site-nav ${navSolid ? 'solid' : ''}`}>
         <a className="brand mono" href="#top">
-          sks
+          {navigation.brand}
         </a>
         <nav>
-          {navItems.map((item) => (
+          {navigation.items.map((item) => (
             <a key={item.label} href={item.href} className="nav-link mono" data-text={item.label}>
               {item.label}
             </a>
@@ -477,51 +384,41 @@ function App() {
           <NeuralBackground />
           <div className="hero-vignette" aria-hidden="true" />
           <div className="hero-content">
-            <p className="hero-label mono">AI SYSTEMS ENGINEER</p>
-            <h1 className="hero-name">Sulav Kumar Shrestha</h1>
-            <p className="hero-tagline">
-              Building intelligent systems at the intersection of LLMs, inference optimization & cloud
-              infrastructure.
-            </p>
+            <p className="hero-label mono">{hero.roleLabel}</p>
+            <h1 className="hero-name">{hero.name}</h1>
+            <p className="hero-tagline">{hero.tagline}</p>
             <div className="hero-actions">
-              <a href="#projects" className="btn btn-outline">
-                view work
-              </a>
-              <a href="#contact" className="btn btn-solid">
-                get in touch
-              </a>
+              {hero.actions.map((action) => (
+                <a key={action.label} href={action.href} className={`btn btn-${action.variant}`}>
+                  {action.label}
+                </a>
+              ))}
             </div>
           </div>
           <div className="scroll-hint mono">
             <span className="line" />
-            scroll
+            {hero.scrollLabel}
           </div>
         </section>
 
         <section id="about" className="section">
           <div className="section-head reveal">
-            <span className="section-label mono">01</span>
-            <h2>About</h2>
+            <span className="section-label mono">{about.sectionNumber}</span>
+            <h2>{about.title}</h2>
           </div>
           <div className="about-grid">
             <div className="about-copy reveal" data-delay="0.05">
-              <p>
-                I&apos;m an AI & Data Science student at KPRIET, Coimbatore (CGPA 9.0/10) with production
-                experience shipping AI systems — from document compliance pipelines processing hundreds of
-                thousands of records, to real-time object detection at the edge. My focus is on LLM systems,
-                inference optimization, and AI infrastructure. I like building things that run fast and scale,
-                not just things that work.
-              </p>
+              <p>{about.bio}</p>
             </div>
             <aside className="about-side reveal" data-delay="0.1">
-              <h3 className="mono">Currently</h3>
+              <h3 className="mono">{about.sidebarTitle}</h3>
               <ul>
-                {currentlyItems.map((item) => (
+                {about.currently.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
               </ul>
               <div className="social-links">
-                {socialLinks.map((link) => (
+                {about.links.map((link) => (
                   <a key={link.label} href={link.href} target="_blank" rel="noreferrer">
                     <span className="mono">{link.label}</span>
                     <span aria-hidden="true">↗</span>
@@ -534,12 +431,12 @@ function App() {
 
         <section id="experience" className="section">
           <div className="section-head reveal">
-            <span className="section-label mono">02</span>
-            <h2>Experience</h2>
+            <span className="section-label mono">{experience.sectionNumber}</span>
+            <h2>{experience.title}</h2>
           </div>
           <div className="timeline">
-            {experienceItems.map((item, idx) => (
-              <article className="timeline-item reveal left-reveal" data-delay={idx * 0.08} key={item.company}>
+            {experience.items.map((item, idx) => (
+              <article className="timeline-item reveal left-reveal" data-delay={idx * 0.08} key={`${item.company}-${item.role}`}>
                 <header>
                   <h3>{item.company}</h3>
                   <p className="mono">{item.role}</p>
@@ -557,15 +454,15 @@ function App() {
 
         <section id="skills" className="section">
           <div className="section-head reveal">
-            <span className="section-label mono">03</span>
-            <h2>Skills & Stack</h2>
+            <span className="section-label mono">{skills.sectionNumber}</span>
+            <h2>{skills.title}</h2>
           </div>
           <div className="skills-grid reveal" data-delay="0.05">
-            {Object.entries(skills).map(([group, items]) => (
-              <div key={group} className="skill-col">
-                <h3 className="mono">{group}</h3>
+            {skills.groups.map((group) => (
+              <div key={group.name} className="skill-col">
+                <h3 className="mono">{group.name}</h3>
                 <ul>
-                  {items.map((item, idx) => {
+                  {group.items.map((item, idx) => {
                     const icon = getSkillIcon(item)
                     const fallback = getSkillFallbackLabel(item)
 
@@ -592,19 +489,19 @@ function App() {
 
         <section id="projects" className="section">
           <div className="section-head reveal">
-            <span className="section-label mono">04</span>
-            <h2>Projects</h2>
+            <span className="section-label mono">{projects.sectionNumber}</span>
+            <h2>{projects.title}</h2>
           </div>
 
           {repoSource === 'fallback' && !loadingRepos ? (
             <p className="source-note mono reveal" data-delay="0.04">
-              GitHub API unavailable — showing cached project data.
+              {projects.fallbackMessage}
             </p>
           ) : null}
 
           <div className="projects-grid">
             {loadingRepos
-              ? Array.from({ length: 6 }).map((_, i) => <div key={`skeleton-${i}`} className="project-card skeleton" />)
+              ? Array.from({ length: projects.limit }).map((_, i) => <div key={`skeleton-${i}`} className="project-card skeleton" />)
               : repos.map((repo, idx) => (
                   <a
                     href={repo.html_url}
@@ -640,37 +537,34 @@ function App() {
 
         <section id="blog" className="section">
           <div className="section-head reveal">
-            <span className="section-label mono">05</span>
-            <h2>Blog</h2>
+            <span className="section-label mono">{blog.sectionNumber}</span>
+            <h2>{blog.title}</h2>
           </div>
           <div className="blog-list">
-            <a className="blog-item reveal left-reveal" data-delay="0" href="https://shorturl.at/eoPbo" target="_blank" rel="noreferrer">
-              <span>A Guide to Quantize YOLOv8 Object Detection Models Using ONNX</span>
-              <em aria-hidden="true">→</em>
-            </a>
-            <a
-              className="blog-item reveal left-reveal"
-              data-delay="0.08"
-              href="https://medium.com/@sulavstha007"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <span>More writing on Medium</span>
-              <em aria-hidden="true">→</em>
-            </a>
+            {blog.items.map((item, idx) => (
+              <a
+                key={item.title}
+                className="blog-item reveal left-reveal"
+                data-delay={idx * 0.08}
+                href={item.href}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <span>{item.title}</span>
+                <em aria-hidden="true">→</em>
+              </a>
+            ))}
           </div>
         </section>
 
         <section id="contact" className="section contact">
           <div className="reveal">
-            <span className="section-label mono">06</span>
-            <h2>Let&apos;s build something.</h2>
-            <p>
-              Open to full-time roles, research collaborations, and interesting problems in AI systems.
-            </p>
+            <span className="section-label mono">{contact.sectionNumber}</span>
+            <h2>{contact.title}</h2>
+            <p>{contact.subtitle}</p>
           </div>
           <div className="contact-list">
-            {contactLinks.map((item, idx) => (
+            {contact.links.map((item, idx) => (
               <a key={item.label} href={item.href} className="reveal" data-delay={idx * 0.06}>
                 <span className="mono">{item.label}</span>
                 <span>{item.value}</span>

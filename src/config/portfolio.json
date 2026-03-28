@@ -1,0 +1,217 @@
+{
+  "navigation": {
+    "brand": "sks",
+    "items": [
+      { "label": "about", "href": "#about" },
+      { "label": "experience", "href": "#experience" },
+      { "label": "skills", "href": "#skills" },
+      { "label": "projects", "href": "#projects" },
+      { "label": "blog", "href": "#blog" },
+      { "label": "contact", "href": "#contact" }
+    ]
+  },
+  "hero": {
+    "roleLabel": "AI SYSTEMS ENGINEER",
+    "name": "Sulav Kumar Shrestha",
+    "tagline": "Building intelligent systems at the intersection of LLMs, inference optimization & cloud infrastructure.",
+    "actions": [
+      { "label": "view work", "href": "#projects", "variant": "outline" },
+      { "label": "get in touch", "href": "#contact", "variant": "solid" }
+    ],
+    "scrollLabel": "scroll"
+  },
+  "about": {
+    "sectionNumber": "01",
+    "title": "About",
+    "bio": "I'm an AI & Data Science student at KPRIET, Coimbatore (CGPA 9.0/10) with production experience shipping AI systems — from document compliance pipelines processing hundreds of thousands of records, to real-time object detection at the edge. My focus is on LLM systems, inference optimization, and AI infrastructure. I like building things that run fast and scale, not just things that work.",
+    "sidebarTitle": "Currently",
+    "currently": [
+      "Shipping LLM workflows on Azure",
+      "Optimizing inference for edge and cloud",
+      "Designing scalable microservice AI systems"
+    ],
+    "links": [
+      { "label": "GitHub", "href": "https://github.com/majipa007" },
+      { "label": "Medium", "href": "https://medium.com/@sulavstha007" },
+      { "label": "LinkedIn", "href": "https://linkedin.com/in/sulav-shrestha-16b1091bb" },
+      { "label": "Kaggle", "href": "https://kaggle.com/sulavshrestha007" },
+      { "label": "LeetCode", "href": "https://leetcode.com" },
+      { "label": "HackerRank", "href": "https://hackerrank.com" }
+    ]
+  },
+  "experience": {
+    "sectionNumber": "02",
+    "title": "Experience",
+    "items": [
+      {
+        "company": "InCorp",
+        "role": "AI & Data Engineer Intern",
+        "period": "Apr 2025 – Present (Onsite)",
+        "points": [
+          "Built intelligent PDF-to-Excel extraction pipelines using Azure Document Intelligence + Azure OpenAI. Cut processing time from 1–2 hours to under 5 minutes.",
+          "Designed large-scale document compliance system across 6 microservices/AKS pods with Azure Service Bus, handling hundreds of thousands of documents with classification, verification, and validation.",
+          "Developed transaction risk workflows flagging duplicates, anomalies, and compliance violations with automated reporting.",
+          "Stack: FastAPI, CosmosDB, Redis, MS Graph API, SharePoint, Azure OpenAI, Azure Document Intelligence, AKS, HMAC-secured endpoints."
+        ]
+      },
+      {
+        "company": "Sprhava (Germany, Remote)",
+        "role": "Jr. Data Scientist",
+        "period": "Jul 2024 – Nov 2024",
+        "points": [
+          "Enhanced YOLOv8 obstacle tracking system; reduced false positives.",
+          "Replaced DeepSORT with ByteTrack — boosted FPS by 30% in dynamic envs.",
+          "Optimized system for cloud deployment.",
+          "Stack: YOLOv8, ByteTrack, Python, OpenCV, Git."
+        ]
+      }
+    ]
+  },
+  "skills": {
+    "sectionNumber": "03",
+    "title": "Skills & Stack",
+    "groups": [
+      {
+        "name": "Languages",
+        "items": ["Python", "Java", "JavaScript", "SQL"]
+      },
+      {
+        "name": "AI/ML",
+        "items": [
+          "PyTorch",
+          "TensorFlow/Keras",
+          "Scikit-learn",
+          "YOLOv8",
+          "OpenCV",
+          "MediaPipe",
+          "ONNX Runtime",
+          "NumPy",
+          "Pandas"
+        ]
+      },
+      {
+        "name": "LLM/NLP",
+        "items": ["LangChain", "Hugging Face Transformers", "Azure OpenAI", "Prompt Engineering"]
+      },
+      {
+        "name": "Infrastructure",
+        "items": [
+          "Docker",
+          "AKS/Kubernetes",
+          "FastAPI",
+          "PostgreSQL",
+          "CosmosDB",
+          "Redis",
+          "Apache Airflow",
+          "dbt",
+          "Azure Service Bus"
+        ]
+      }
+    ]
+  },
+  "projects": {
+    "sectionNumber": "04",
+    "title": "Projects",
+    "apiUrl": "https://api.github.com/users/majipa007/repos?sort=updated&per_page=100",
+    "limit": 6,
+    "fallbackMessage": "GitHub API unavailable — showing cached project data.",
+    "emptyDescription": "No description provided.",
+    "fallbackRepos": [
+      {
+        "id": "fallback-1",
+        "name": "Quantization-YOLOv8",
+        "html_url": "https://github.com/majipa007/Quantization-YOLOv8",
+        "description": "Static quantization of YOLOv8 for edge deployment. 22% faster inference, 72% smaller model (12.8MB → 3.6MB), CPU-only.",
+        "stargazers_count": 26,
+        "forks_count": 12,
+        "language": "Jupyter Notebook",
+        "topics": ["onnx", "yolov8", "quantization", "edge-ai"],
+        "updated_at": "2025-03-01T00:00:00Z"
+      },
+      {
+        "id": "fallback-2",
+        "name": "fall_detection",
+        "html_url": "https://github.com/majipa007/fall_detection",
+        "description": "Real-time fall detection using pose estimation and computer vision.",
+        "stargazers_count": 3,
+        "forks_count": 0,
+        "language": "Python",
+        "topics": ["computer-vision", "pose-estimation", "realtime"],
+        "updated_at": "2025-02-15T00:00:00Z"
+      },
+      {
+        "id": "fallback-3",
+        "name": "mindscape",
+        "html_url": "https://github.com/majipa007/mindscape",
+        "description": "Mental health platform with LLM-powered psychiatrist chatbot (Aimee), guided meditation, breathing exercises, and appointment scheduling.",
+        "stargazers_count": 1,
+        "forks_count": 1,
+        "language": "Python",
+        "topics": ["llm", "mental-health", "chatbot"],
+        "updated_at": "2025-01-29T00:00:00Z"
+      },
+      {
+        "id": "fallback-4",
+        "name": "NaturalQuery-Executor-Using-Phi-3",
+        "html_url": "https://github.com/majipa007/NaturalQuery-Executor-Using-Phi-3",
+        "description": "Natural language to SQL using Phi-3 for non-technical database access.",
+        "stargazers_count": 1,
+        "forks_count": 1,
+        "language": "Jupyter Notebook",
+        "topics": ["phi-3", "text-to-sql", "nlp"],
+        "updated_at": "2025-01-24T00:00:00Z"
+      },
+      {
+        "id": "fallback-5",
+        "name": "RetailMetrics-Modern-Data-Stack",
+        "html_url": "https://github.com/majipa007/RetailMetrics-Modern-Data-Stack",
+        "description": "Full-stack retail analytics with Airflow, dbt, PostgreSQL, and real-time dashboards.",
+        "stargazers_count": 1,
+        "forks_count": 0,
+        "language": "Python",
+        "topics": ["airflow", "dbt", "analytics-engineering"],
+        "updated_at": "2025-01-14T00:00:00Z"
+      },
+      {
+        "id": "fallback-6",
+        "name": "Automated-Surveillance-System",
+        "html_url": "https://github.com/majipa007/Automated-Surveillance-System",
+        "description": "CV-based automated surveillance with real-time detection and alerting.",
+        "stargazers_count": 0,
+        "forks_count": 0,
+        "language": "Python",
+        "topics": ["opencv", "surveillance", "detection"],
+        "updated_at": "2025-01-09T00:00:00Z"
+      }
+    ]
+  },
+  "blog": {
+    "sectionNumber": "05",
+    "title": "Blog",
+    "items": [
+      {
+        "title": "A Guide to Quantize YOLOv8 Object Detection Models Using ONNX",
+        "href": "https://shorturl.at/eoPbo"
+      },
+      {
+        "title": "More writing on Medium",
+        "href": "https://medium.com/@sulavstha007"
+      }
+    ]
+  },
+  "contact": {
+    "sectionNumber": "06",
+    "title": "Let's build something.",
+    "subtitle": "Open to full-time roles, research collaborations, and interesting problems in AI systems.",
+    "links": [
+      { "label": "Email", "value": "sulavstha007@gmail.com", "href": "mailto:sulavstha007@gmail.com" },
+      { "label": "GitHub", "value": "github.com/majipa007", "href": "https://github.com/majipa007" },
+      {
+        "label": "LinkedIn",
+        "value": "sulav-shrestha-16b1091bb",
+        "href": "https://linkedin.com/in/sulav-shrestha-16b1091bb"
+      },
+      { "label": "Phone", "value": "+91 8921875723", "href": "tel:+918921875723" }
+    ]
+  }
+}

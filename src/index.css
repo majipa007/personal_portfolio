@@ -1,4 +1,24 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Xanh+Mono:ital@0;1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap');
+
+@font-face {
+  font-family: '0xProto';
+  src:
+    url('/fonts/0xproto/0xProtoNerdFont-Regular.ttf') format('truetype'),
+    url('/fonts/0xproto/0xProtoNerdFontMono-Regular.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: '0xProto';
+  src:
+    url('/fonts/0xproto/0xProtoNerdFont-Bold.ttf') format('truetype'),
+    url('/fonts/0xproto/0xProtoNerdFontMono-Bold.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
 
 :root {
   --bg: #0a0a0a;
@@ -43,7 +63,7 @@ h1,
 h2,
 h3,
 .hero-name {
-  font-family: 'Xanh Mono', 'DM Mono', monospace;
+  font-family: '0xProto', 'DM Mono', monospace;
   font-weight: 700;
   font-stretch: normal;
   font-synthesis: none;

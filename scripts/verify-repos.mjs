@@ -1,12 +1,27 @@
 import { fetchPortfolioRepos } from '../src/lib/github.js'
+import portfolioConfig from '../src/config/portfolio.json' with { type: 'json' }
 
 async function run() {
-  const successResult = await fetchPortfolioRepos()
-  if (!Array.isArray(successResult.repos) || successResult.repos.length !== 6) {
-    throw new Error('Expected 6 repos from API/fallback flow.')
+  const { projects } = portfolioConfig
+
+  const successResult = await fetchPortfolioRepos({
+    url: projects.apiUrl,
+    fallbackRepos: projects.fallbackRepos,
+    limit: projects.limit,
+    emptyDescription: projects.emptyDescription,
+  })
+
+  if (!Array.isArray(successResult.repos) || successResult.repos.length !== projects.limit) {
+    throw new Error(`Expected ${projects.limit} repos from API/fallback flow.`)
   }
 
-  const fallbackResult = await fetchPortfolioRepos('https://api.github.com/users/majipa007/this-will-fail')
+  const fallbackResult = await fetchPortfolioRepos({
+    url: 'https://api.github.com/users/majipa007/this-will-fail',
+    fallbackRepos: projects.fallbackRepos,
+    limit: projects.limit,
+    emptyDescription: projects.emptyDescription,
+  })
+
   if (fallbackResult.source !== 'fallback') {
     throw new Error('Expected fallback path to trigger on failing URL.')
   }
