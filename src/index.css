@@ -132,7 +132,7 @@ main {
 .hero-content {
   position: relative;
   z-index: 2;
-  max-width: 900px;
+  max-width: min(900px, 58vw);
 }
 
 .hero-label {
@@ -386,11 +386,46 @@ main {
   padding: 8px 0;
   border-bottom: 1px solid #1c1c1c;
   transition: transform 240ms var(--ease), color 240ms var(--ease);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.skill-logo {
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #8f8f8f;
+  flex: 0 0 16px;
+}
+
+.skill-logo svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+  fill: currentColor;
+}
+
+.skill-fallback {
+  font-size: 0.5rem;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  border: 1px solid #2d2d2d;
+  border-radius: 2px;
+  color: #8f8f8f;
+  padding: 2px 3px;
 }
 
 .skill-col li:hover {
   transform: translateX(4px);
   color: var(--text);
+}
+
+.skill-col li:hover .skill-logo,
+.skill-col li:hover .skill-fallback {
+  color: #d4d4d4;
 }
 
 .projects-grid {
@@ -669,6 +704,10 @@ main {
 
   .site-nav nav {
     display: none;
+  }
+
+  .hero-content {
+    max-width: 100%;
   }
 
   .about-grid,

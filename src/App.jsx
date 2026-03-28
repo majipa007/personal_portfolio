@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 import gsap from 'gsap'
 import { fetchPortfolioRepos } from './lib/github'
+import { getSkillFallbackLabel, getSkillIcon } from './lib/skillIcons'
 
 const navItems = [
   { label: 'about', href: '#about' },
@@ -192,6 +193,7 @@ function NeuralBackground() {
       mouse.y = (event.clientY / window.innerHeight) * 2 - 1
     }
 
+    const baseOffsetX = 1.85
     let drift = 0
     let driftDirection = 1
     const clock = new THREE.Clock()
@@ -204,9 +206,9 @@ function NeuralBackground() {
       if (Math.abs(drift) > 0.34) {
         driftDirection *= -1
       }
-      root.position.x = drift
+      root.position.x = baseOffsetX + drift
 
-      targetCamera.x = mouse.x * 0.4
+      targetCamera.x = mouse.x * 0.36
       targetCamera.y = -mouse.y * 0.25
       camera.position.x += (targetCamera.x - camera.position.x) * 0.04
       camera.position.y += (targetCamera.y - camera.position.y) * 0.04
@@ -554,11 +556,25 @@ function App() {
               <div key={group} className="skill-col">
                 <h3 className="mono">{group}</h3>
                 <ul>
-                  {items.map((item, idx) => (
-                    <li key={item} data-delay={idx * 0.02}>
-                      {item}
-                    </li>
-                  ))}
+                  {items.map((item, idx) => {
+                    const icon = getSkillIcon(item)
+                    const fallback = getSkillFallbackLabel(item)
+
+                    return (
+                      <li key={item} data-delay={idx * 0.02}>
+                        <span className="skill-logo" aria-hidden="true">
+                          {icon ? (
+                            <svg viewBox="0 0 24 24">
+                              <path d={icon.path} />
+                            </svg>
+                          ) : (
+                            <span className="skill-fallback mono">{fallback}</span>
+                          )}
+                        </span>
+                        <span>{item}</span>
+                      </li>
+                    )
+                  })}
                 </ul>
               </div>
             ))}
