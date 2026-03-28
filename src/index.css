@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Xanh+Mono:ital@0;1&display=swap');
 
 :root {
   --bg: #0a0a0a;
@@ -43,8 +43,8 @@ h1,
 h2,
 h3,
 .hero-name {
-  font-family: 'Syne', system-ui, sans-serif;
-  font-weight: 800;
+  font-family: 'Xanh Mono', 'DM Mono', monospace;
+  font-weight: 700;
   font-stretch: normal;
   font-synthesis: none;
 }
@@ -144,7 +144,7 @@ main {
 .hero-name {
   margin: 0;
   font-size: clamp(2.8rem, 9vw, 6rem);
-  letter-spacing: -0.04em;
+  letter-spacing: -0.02em;
   line-height: 0.95;
 }
 
