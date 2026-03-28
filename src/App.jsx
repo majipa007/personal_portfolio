@@ -14,149 +14,236 @@ function NeuralBackground() {
     const canvas = canvasRef.current
     if (!canvas) return
 
-    const scene = new THREE.Scene()
-    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100)
-    camera.position.set(0, 0, 7)
-
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-    renderer.setSize(window.innerWidth, window.innerHeight)
+    renderer.setClearColor(0x080808, 1)
 
-    const root = new THREE.Group()
-    scene.add(root)
+    const scene = new THREE.Scene()
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000)
+    camera.position.set(0, 0, 28)
 
-    const ambient = new THREE.AmbientLight(0x2a2a2a, 0.45)
-    const point = new THREE.PointLight(0x333333, 0.65)
-    point.position.set(2, 3, 4)
-    scene.add(ambient, point)
-
-    const layerX = [-3.4, -1.8, 0, 1.8, 3.4]
-    const layerCounts = [12, 18, 20, 18, 12]
-    const layerNodes = []
-    const nodeMaterial = new THREE.MeshStandardMaterial({ color: '#1e1e1e', emissive: '#333333', roughness: 0.9 })
-
-    layerX.forEach((x, layerIndex) => {
-      const nodes = []
-      const count = layerCounts[layerIndex]
-      for (let i = 0; i < count; i += 1) {
-        const y = ((i / (count - 1 || 1)) * 3.8 - 1.9) + (Math.random() - 0.5) * 0.45
-        const z = (Math.random() - 0.5) * 2.6
-        const radius = 0.06 + Math.random() * 0.06
-        const mesh = new THREE.Mesh(new THREE.SphereGeometry(radius, 16, 16), nodeMaterial)
-        mesh.position.set(x + (Math.random() - 0.5) * 0.25, y, z)
-        nodes.push(mesh)
-        root.add(mesh)
-      }
-      layerNodes.push(nodes)
-    })
-
-    const edges = []
-    const lineMaterial = new THREE.LineBasicMaterial({ color: '#1a1a1a', transparent: true, opacity: 0.7 })
-
-    for (let i = 0; i < layerNodes.length - 1; i += 1) {
-      const sourceLayer = layerNodes[i]
-      const targetLayer = layerNodes[i + 1]
-      sourceLayer.forEach((node) => {
-        const sampled = [...targetLayer].sort(() => Math.random() - 0.5).slice(0, 2 + Math.floor(Math.random() * 3))
-        sampled.forEach((targetNode) => {
-          const points = [node.position.clone(), targetNode.position.clone()]
-          const geometry = new THREE.BufferGeometry().setFromPoints(points)
-          const line = new THREE.Line(geometry, lineMaterial)
-          root.add(line)
-          edges.push({ from: node.position.clone(), to: targetNode.position.clone() })
-        })
-      })
-    }
-
-    const pulseMaterial = new THREE.MeshBasicMaterial({ color: '#888888', transparent: true, opacity: 0 })
-    const pulse = new THREE.Mesh(new THREE.SphereGeometry(0.03, 10, 10), pulseMaterial)
-    root.add(pulse)
-
-    let currentPulse = null
-    const triggerPulse = () => {
-      const edge = edges[Math.floor(Math.random() * edges.length)]
-      if (!edge) return
-      if (currentPulse) currentPulse.kill()
-
-      const state = { t: 0 }
-      pulse.visible = true
-      currentPulse = gsap.timeline()
-      currentPulse
-        .to(pulseMaterial, { opacity: 1, duration: 0.15, ease: 'power1.out' })
-        .to(
-          state,
-          {
-            t: 1,
-            duration: 1,
-            ease: 'none',
-            onUpdate: () => {
-              pulse.position.lerpVectors(edge.from, edge.to, state.t)
-            },
-          },
-          0,
-        )
-        .to(pulseMaterial, { opacity: 0, duration: 0.2, ease: 'power1.in' }, 0.85)
-    }
-
-    triggerPulse()
-    const pulseInterval = window.setInterval(triggerPulse, 1500)
-
-    const mouse = { x: 0, y: 0 }
-    const targetCamera = new THREE.Vector3(0, 0, 7)
-
-    const onPointerMove = (event) => {
-      mouse.x = (event.clientX / window.innerWidth) * 2 - 1
-      mouse.y = (event.clientY / window.innerHeight) * 2 - 1
-    }
-
-    const getBaseOffsetX = () => {
-      if (window.innerWidth >= 1600) return 2.55
-      if (window.innerWidth >= 1280) return 2.3
-      if (window.innerWidth >= 1024) return 2.05
-      if (window.innerWidth >= 760) return 1.45
-      return 0.85
-    }
-
-    let baseOffsetX = getBaseOffsetX()
-    let drift = 0
-    let driftDirection = 1
-    const clock = new THREE.Clock()
-    let raf = 0
-
-    const tick = () => {
-      const delta = clock.getDelta()
-      root.rotation.y += 0.0003 * (delta * 60)
-      drift += 0.00008 * driftDirection * (delta * 60)
-      if (Math.abs(drift) > 0.34) {
-        driftDirection *= -1
-      }
-      root.position.x = baseOffsetX + drift
-
-      targetCamera.x = mouse.x * 0.36
-      targetCamera.y = -mouse.y * 0.25
-      camera.position.x += (targetCamera.x - camera.position.x) * 0.04
-      camera.position.y += (targetCamera.y - camera.position.y) * 0.04
-      camera.lookAt(0, 0, 0)
-
-      renderer.render(scene, camera)
-      raf = window.requestAnimationFrame(tick)
-    }
-
-    const onResize = () => {
-      baseOffsetX = getBaseOffsetX()
+    const resize = () => {
+      renderer.setSize(window.innerWidth, window.innerHeight)
       camera.aspect = window.innerWidth / window.innerHeight
       camera.updateProjectionMatrix()
-      renderer.setSize(window.innerWidth, window.innerHeight)
+    }
+    resize()
+    window.addEventListener('resize', resize)
+
+    const NUM_HEADS = 4
+    const TOKENS_PER_ROW = 10
+    const NUM_LAYERS = 4
+    const LAYER_GAP = 7.5
+    const TOKEN_SPREAD = 2.4
+    const HEAD_COLORS = [
+      new THREE.Color(0xe8d5b0),
+      new THREE.Color(0xb0c8e8),
+      new THREE.Color(0xb0e8c8),
+      new THREE.Color(0xe8b0c8),
+    ]
+
+    const makeTokenMesh = (color, size = 0.18, opacity = 1) => {
+      const geo = new THREE.CircleGeometry(size, 16)
+      const mat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity, depthWrite: false })
+      return new THREE.Mesh(geo, mat)
     }
 
-    window.addEventListener('resize', onResize)
-    window.addEventListener('pointermove', onPointerMove)
-    tick()
+    const makeArcPoints = (startPos, endPos, lift, segments = 28) => {
+      const pts = []
+      for (let i = 0; i <= segments; i += 1) {
+        const t = i / segments
+        const x = startPos.x + (endPos.x - startPos.x) * t
+        const y = startPos.y + (endPos.y - startPos.y) * t + lift * Math.sin(Math.PI * t)
+        const z = startPos.z + (endPos.z - startPos.z) * t
+        pts.push(new THREE.Vector3(x, y, z))
+      }
+      return pts
+    }
+
+    const rebuildHeadArcs = (layer, head, queryIndex) => {
+      head.lines.forEach(({ line, targetIndex }) => {
+        if (targetIndex === queryIndex) {
+          line.material.opacity = 0
+          line.userData.targetOpacity = 0
+          return
+        }
+
+        const pts = makeArcPoints(
+          layer.tokenPositions[queryIndex],
+          layer.tokenPositions[targetIndex],
+          1.2 + line.userData.weight * 2.5,
+        )
+        const geo = new THREE.BufferGeometry().setFromPoints(pts)
+        line.geometry.dispose()
+        line.geometry = geo
+        line.userData.targetOpacity = line.userData.weight * 0.55 + 0.05
+      })
+
+      head.queryIndex = queryIndex
+      head.qMesh.position.copy(layer.tokenPositions[queryIndex])
+      head.qMesh.material.opacity = 0.9
+    }
+
+    const allLayers = []
+
+    for (let layerIndex = 0; layerIndex < NUM_LAYERS; layerIndex += 1) {
+      const layerY = (layerIndex - (NUM_LAYERS - 1) / 2) * LAYER_GAP
+      const layerGroup = new THREE.Group()
+      layerGroup.position.y = layerY
+
+      const tokenPositions = []
+      for (let t = 0; t < TOKENS_PER_ROW; t += 1) {
+        const x = (t - (TOKENS_PER_ROW - 1) / 2) * TOKEN_SPREAD
+        tokenPositions.push(new THREE.Vector3(x, 0, 0))
+      }
+
+      tokenPositions.forEach((pos) => {
+        const mesh = makeTokenMesh(0x888070, 0.16, 0.55)
+        mesh.position.copy(pos)
+        layerGroup.add(mesh)
+      })
+
+      const headArcs = []
+      for (let h = 0; h < NUM_HEADS; h += 1) {
+        const queryIndex = Math.floor(Math.random() * TOKENS_PER_ROW)
+        const lines = []
+
+        for (let k = 0; k < TOKENS_PER_ROW; k += 1) {
+          if (k === queryIndex) continue
+
+          const weight = 0.05 + Math.random() * 0.95
+          const lift = 1.2 + weight * 2.5
+          const pts = makeArcPoints(tokenPositions[queryIndex], tokenPositions[k], lift)
+          const geo = new THREE.BufferGeometry().setFromPoints(pts)
+          const mat = new THREE.LineBasicMaterial({
+            color: HEAD_COLORS[h],
+            transparent: true,
+            opacity: 0,
+            depthWrite: false,
+          })
+
+          const line = new THREE.Line(geo, mat)
+          line.userData = {
+            weight,
+            targetOpacity: weight * 0.55 + 0.05,
+            phase: Math.random() * Math.PI * 2,
+          }
+
+          layerGroup.add(line)
+          lines.push({ line, targetIndex: k })
+        }
+
+        const qMesh = makeTokenMesh(HEAD_COLORS[h], 0.22, 0)
+        qMesh.position.copy(tokenPositions[queryIndex])
+        qMesh.position.z = 0.1
+        layerGroup.add(qMesh)
+
+        headArcs.push({ lines, qMesh, queryIndex })
+      }
+
+      if (layerIndex > 0) {
+        const lineColor = new THREE.Color(0x2a2820)
+        tokenPositions.forEach((pos) => {
+          const pts = [new THREE.Vector3(pos.x, 0, 0), new THREE.Vector3(pos.x, -LAYER_GAP + 0.2, 0)]
+          const geo = new THREE.BufferGeometry().setFromPoints(pts)
+          const mat = new THREE.LineBasicMaterial({ color: lineColor, transparent: true, opacity: 0.6 })
+          layerGroup.add(new THREE.Line(geo, mat))
+        })
+      }
+
+      scene.add(layerGroup)
+      allLayers.push({ layerGroup, headArcs, tokenPositions })
+    }
+
+    const CYCLE_INTERVAL = 2600
+    const layerTimers = allLayers.map((_, i) => -i * 650)
+
+    let mouseX = 0
+    let mouseY = 0
+
+    const onMouseMove = (event) => {
+      mouseX = (event.clientX / window.innerWidth - 0.5) * 2
+      mouseY = (event.clientY / window.innerHeight - 0.5) * 2
+    }
+
+    window.addEventListener('mousemove', onMouseMove)
+
+    const shiftQuery = (layerIdx, headIdx) => {
+      const layer = allLayers[layerIdx]
+      const head = layer.headArcs[headIdx]
+
+      head.lines.forEach(({ line }) => {
+        line.userData.targetOpacity = 0
+      })
+      head.qMesh.material.opacity = 0
+
+      let newQuery = Math.floor(Math.random() * TOKENS_PER_ROW)
+      while (newQuery === head.queryIndex) {
+        newQuery = Math.floor(Math.random() * TOKENS_PER_ROW)
+      }
+
+      rebuildHeadArcs(layer, head, newQuery)
+    }
+
+    let camTime = 0
+    let raf = 0
+    let lastTs = 0
+
+    const animate = (ts) => {
+      if (!lastTs) lastTs = ts
+      const dt = Math.min(16, ts - lastTs)
+      lastTs = ts
+      camTime += dt * 0.001
+
+      camera.position.x += (mouseX * 3.5 - camera.position.x) * 0.04
+      camera.position.y += (-mouseY * 2 - camera.position.y) * 0.04
+      camera.position.z = 28 + Math.sin(camTime * 0.18) * 0.8
+      camera.lookAt(0, 0, 0)
+
+      scene.rotation.y = Math.sin(camTime * 0.08) * 0.06
+      scene.rotation.x = Math.cos(camTime * 0.06) * 0.03
+
+      allLayers.forEach((layer, li) => {
+        layerTimers[li] += dt
+        if (layerTimers[li] > CYCLE_INTERVAL) {
+          layerTimers[li] = 0
+          shiftQuery(li, Math.floor(Math.random() * NUM_HEADS))
+        }
+
+        layer.headArcs.forEach((head, hi) => {
+          head.lines.forEach(({ line }) => {
+            const target = line.userData.targetOpacity
+            const pulse = 1 + 0.12 * Math.sin(camTime * 1.4 + line.userData.phase)
+            line.material.opacity += (target * pulse - line.material.opacity) * 0.06
+          })
+
+          if (head.qMesh.material.opacity > 0.01) {
+            head.qMesh.material.opacity = 0.7 + 0.25 * Math.sin(camTime * 2.2 + hi * 1.3)
+          }
+        })
+      })
+
+      renderer.render(scene, camera)
+      raf = window.requestAnimationFrame(animate)
+    }
+
+    const initTimer = window.setTimeout(() => {
+      allLayers.forEach((layer) => {
+        layer.headArcs.forEach((head) => {
+          head.lines.forEach(({ line }) => {
+            line.userData.targetOpacity = line.userData.weight * 0.55 + 0.05
+          })
+          head.qMesh.material.opacity = 0.9
+        })
+      })
+    }, 400)
+
+    raf = window.requestAnimationFrame(animate)
 
     return () => {
-      window.removeEventListener('resize', onResize)
-      window.removeEventListener('pointermove', onPointerMove)
-      window.clearInterval(pulseInterval)
+      window.clearTimeout(initTimer)
+      window.removeEventListener('resize', resize)
+      window.removeEventListener('mousemove', onMouseMove)
       window.cancelAnimationFrame(raf)
       renderer.dispose()
       scene.traverse((obj) => {
