@@ -20,12 +20,27 @@ function NeuralBackground() {
 
     const scene = new THREE.Scene()
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000)
-    camera.position.set(0, 0, 28)
+
+    const getSceneOffsetX = () => {
+      if (window.innerWidth >= 1280) return 6.2
+      if (window.innerWidth >= 1024) return 5.2
+      if (window.innerWidth >= 760) return 3.4
+      return 1.2
+    }
+
+    let sceneOffsetX = getSceneOffsetX()
+    camera.position.set(sceneOffsetX, 0, 28)
+
+    const rig = new THREE.Group()
+    rig.position.x = sceneOffsetX
+    scene.add(rig)
 
     const resize = () => {
       renderer.setSize(window.innerWidth, window.innerHeight)
       camera.aspect = window.innerWidth / window.innerHeight
       camera.updateProjectionMatrix()
+      sceneOffsetX = getSceneOffsetX()
+      rig.position.x = sceneOffsetX
     }
     resize()
     window.addEventListener('resize', resize)
@@ -36,10 +51,10 @@ function NeuralBackground() {
     const LAYER_GAP = 7.5
     const TOKEN_SPREAD = 2.4
     const HEAD_COLORS = [
-      new THREE.Color(0xe8d5b0),
-      new THREE.Color(0xb0c8e8),
-      new THREE.Color(0xb0e8c8),
-      new THREE.Color(0xe8b0c8),
+      new THREE.Color(0x6e6e6e),
+      new THREE.Color(0x808080),
+      new THREE.Color(0x929292),
+      new THREE.Color(0xa6a6a6),
     ]
 
     const makeTokenMesh = (color, size = 0.18, opacity = 1) => {
@@ -151,7 +166,7 @@ function NeuralBackground() {
         })
       }
 
-      scene.add(layerGroup)
+      rig.add(layerGroup)
       allLayers.push({ layerGroup, headArcs, tokenPositions })
     }
 
@@ -195,13 +210,13 @@ function NeuralBackground() {
       lastTs = ts
       camTime += dt * 0.001
 
-      camera.position.x += (mouseX * 3.5 - camera.position.x) * 0.04
+      camera.position.x += (sceneOffsetX + mouseX * 2.8 - camera.position.x) * 0.04
       camera.position.y += (-mouseY * 2 - camera.position.y) * 0.04
       camera.position.z = 28 + Math.sin(camTime * 0.18) * 0.8
-      camera.lookAt(0, 0, 0)
+      camera.lookAt(sceneOffsetX, 0, 0)
 
-      scene.rotation.y = Math.sin(camTime * 0.08) * 0.06
-      scene.rotation.x = Math.cos(camTime * 0.06) * 0.03
+      rig.rotation.y = Math.sin(camTime * 0.08) * 0.06
+      rig.rotation.x = Math.cos(camTime * 0.06) * 0.03
 
       allLayers.forEach((layer, li) => {
         layerTimers[li] += dt
