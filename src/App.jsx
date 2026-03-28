@@ -193,7 +193,15 @@ function NeuralBackground() {
       mouse.y = (event.clientY / window.innerHeight) * 2 - 1
     }
 
-    const baseOffsetX = 1.85
+    const getBaseOffsetX = () => {
+      if (window.innerWidth >= 1600) return 2.55
+      if (window.innerWidth >= 1280) return 2.3
+      if (window.innerWidth >= 1024) return 2.05
+      if (window.innerWidth >= 760) return 1.45
+      return 0.85
+    }
+
+    let baseOffsetX = getBaseOffsetX()
     let drift = 0
     let driftDirection = 1
     const clock = new THREE.Clock()
@@ -219,6 +227,7 @@ function NeuralBackground() {
     }
 
     const onResize = () => {
+      baseOffsetX = getBaseOffsetX()
       camera.aspect = window.innerWidth / window.innerHeight
       camera.updateProjectionMatrix()
       renderer.setSize(window.innerWidth, window.innerHeight)

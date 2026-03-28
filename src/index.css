@@ -132,7 +132,7 @@ main {
 .hero-content {
   position: relative;
   z-index: 2;
-  max-width: min(900px, 58vw);
+  max-width: min(860px, 52vw);
 }
 
 .hero-label {
