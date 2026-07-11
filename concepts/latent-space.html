@@ -144,6 +144,16 @@
   .card .arrow{position:absolute;top:clamp(12px,1.6vw,26px);right:clamp(12px,1.6vw,26px);font-family:var(--mono);font-size:12px;color:var(--ink-ghost);transition:transform .4s,color .4s}
   .card:hover .arrow{transform:translate(4px,-4px);color:var(--ink)}
 
+  /* ---------- blog ---------- */
+  #blog .pin{align-items:center}
+  .blog-wrap{max-width:720px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:clamp(16px,3vh,28px)}
+  .blog-wrap .post h3{font-family:var(--serif);font-style:italic;font-weight:400;font-size:clamp(24px,3vw,42px);line-height:1.25;max-width:26ch;color:rgba(230,236,250,.92);text-shadow:0 0 28px rgba(0,0,0,.95);transition:color .35s}
+  .blog-wrap .post .p-meta{margin-top:16px;transition:color .35s}
+  .blog-wrap .post:hover h3{color:var(--ink)}
+  .blog-wrap .post:hover .p-meta{color:var(--ink)}
+  .blog-more{font-family:var(--mono);font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--ink-dim);border-bottom:1px solid var(--hair);padding-bottom:5px;transition:color .3s,border-color .3s}
+  .blog-more:hover{color:var(--ink);border-color:var(--ink)}
+
   /* ---------- contact ---------- */
   #contact .pin{align-items:center;text-align:center;justify-content:center}
   .ct-wrap{display:flex;flex-direction:column;align-items:center;gap:clamp(16px,3vh,28px)}
@@ -210,13 +220,14 @@
 </div>
 
 <div id="brand" class="mono" aria-hidden="true">S·K·S — Latent Space</div>
-<div id="hud" class="mono" aria-hidden="true"><span class="idx" id="hud-idx">01 / 06</span><span id="hud-name">Intro</span></div>
+<div id="hud" class="mono" aria-hidden="true"><span class="idx" id="hud-idx">01 / 07</span><span id="hud-name">Intro</span></div>
 <nav id="dots" aria-label="Sections">
   <a href="#hero" aria-label="Intro" aria-current="true"></a>
   <a href="#about" aria-label="About"></a>
   <a href="#experience" aria-label="Experience"></a>
   <a href="#skills" aria-label="Skills"></a>
   <a href="#projects" aria-label="Projects"></a>
+  <a href="#blog" aria-label="Blog"></a>
   <a href="#contact" aria-label="Contact"></a>
 </nav>
 
@@ -370,10 +381,25 @@
     </div>
   </section>
 
-  <!-- 06 CONTACT -->
+  <!-- 06 WRITING -->
+  <section id="blog" aria-label="Writing">
+    <div class="pin">
+      <div class="sec-head"><span class="mono">05 / Writing</span><h2>Writing</h2></div>
+      <div class="blog-wrap" data-r>
+        <p class="mono">Featured post</p>
+        <a class="post" href="https://shorturl.at/eoPbo" target="_blank" rel="noopener">
+          <h3>A Guide to Quantize YOLOv8 Object Detection Models Using ONNX</h3>
+          <p class="p-meta mono">Medium · ONNX · Quantization ↗</p>
+        </a>
+        <a class="blog-more" href="https://medium.com/@sulavstha007" target="_blank" rel="noopener">More writing on Medium →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 CONTACT -->
   <section id="contact" aria-label="Contact">
     <div class="pin">
-      <div class="sec-head"><span class="mono">05 / Converge</span><h2>Contact</h2></div>
+      <div class="sec-head"><span class="mono">06 / Converge</span><h2>Contact</h2></div>
       <div class="ct-wrap" data-r>
         <p class="mono">Get in touch</p>
         <h2>Let's build intelligent systems.</h2>
@@ -949,13 +975,23 @@ function measure(){
 }
 measure();
 
+/* per-section morph state — the writing stop shares the projects lattice (4),
+   so the converge morph still happens on the approach to contact */
+const SEC_STATE = [0, 1, 2, 3, 4, 4, 5];
 function morphTargetFromScroll(){
   const s = window.scrollY;
   let k = 0;
   while (k < tops.length-1 && s >= tops[k+1]) k++;
-  if (k >= tops.length-1) return tops.length-1;
+  if (k >= tops.length-1) return SEC_STATE[tops.length-1];
   const span = Math.max(1, tops[k+1]-tops[k]);
-  return Math.min(5, k + (s - tops[k]) / span);
+  const f = (s - tops[k]) / span;
+  return Math.min(5, SEC_STATE[k] + (SEC_STATE[k+1] - SEC_STATE[k]) * f);
+}
+function sectionFromScroll(){
+  const s = window.scrollY + innerHeight * 0.5;
+  let k = 0;
+  while (k < tops.length-1 && s >= tops[k+1]) k++;
+  return k;
 }
 
 const lenis = setupScroll(true);
@@ -996,11 +1032,11 @@ if (!document.body.classList.contains('no-webgl')) placeCards();
 const hudIdx = document.getElementById('hud-idx');
 const hudName = document.getElementById('hud-name');
 const dotLinks = document.querySelectorAll('#dots a');
-const SEC_NAMES = ['Intro','About','Experience','Skills','Projects','Contact'];
+const SEC_NAMES = ['Intro','About','Experience','Skills','Projects','Writing','Contact'];
 let hudCur = -1;
 function setHud(i){
   if (i === hudCur) return; hudCur = i;
-  hudIdx.textContent = String(i+1).padStart(2,'0') + ' / 06';
+  hudIdx.textContent = String(i+1).padStart(2,'0') + ' / 07';
   hudName.textContent = SEC_NAMES[i];
   dotLinks.forEach((d,j) => j===i ? d.setAttribute('aria-current','true') : d.removeAttribute('aria-current'));
 }
@@ -1045,7 +1081,7 @@ function tick(now){
   if (mouse.active) uniforms.uMouse.value.set(mouse.nx * visW()/2, mouse.ny * visH()/2);
   else uniforms.uMouse.value.set(999, 999);
 
-  setHud(Math.max(0, Math.min(5, Math.round(morphCur))));
+  setHud(sectionFromScroll());
 
   renderer.render(scene, camera);
 

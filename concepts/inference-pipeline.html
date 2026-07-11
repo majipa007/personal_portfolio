@@ -242,6 +242,20 @@ html.reduced .hero-cue i{animation:none}
 .pj-card:hover .pj-arr{opacity:1; transform:none}
 .pj-more{margin-top:26px}
 
+/* ============ TRACE EXPORTS / BLOG ============ */
+.te-panel{margin-top:16px; padding:0; overflow:hidden; scroll-margin-top:calc(var(--hud-h) + 40px)}
+.te-head{display:flex; flex-wrap:wrap; justify-content:space-between; align-items:baseline; gap:8px 14px; padding:18px 24px; border-bottom:1px solid var(--line)}
+.te-head h3{font-size:11px; letter-spacing:.28em; color:var(--acc); font-weight:500}
+.te-head .te-path{font-size:9.5px; letter-spacing:.2em; color:var(--faint)}
+.te-row{display:flex; flex-wrap:wrap; align-items:baseline; gap:8px 18px; padding:20px 24px; border-bottom:1px dashed var(--line); transition:.25s}
+.te-row .te-k{font-size:9.5px; letter-spacing:.2em; color:var(--faint); white-space:nowrap}
+.te-row .te-t{font-family:var(--disp); font-weight:500; font-size:clamp(1rem,1.7vw,1.25rem); letter-spacing:.01em; flex:1 1 320px; transition:.25s}
+.te-row .te-tag{font-size:10px; letter-spacing:.16em; color:var(--dim); white-space:nowrap; transition:.25s}
+.te-row:hover,.te-row:focus-visible{background:linear-gradient(90deg,var(--acc-soft),transparent); padding-left:34px}
+.te-row:hover .te-t,.te-row:hover .te-tag,.te-row:focus-visible .te-t{color:var(--acc)}
+.te-more{display:inline-block; margin:18px 24px 22px; font-size:11px; letter-spacing:.18em; color:var(--dim); border-bottom:1px solid var(--line2); padding-bottom:2px; transition:.2s}
+.te-more:hover,.te-more:focus-visible{color:var(--acc); border-color:var(--acc)}
+
 /* ============ CONTACT ============ */
 #contact{padding-bottom:0}
 .ct-status{display:inline-flex; gap:14px; align-items:center; padding:10px 16px; border:1px solid rgba(63,214,143,.35);
@@ -334,6 +348,7 @@ html.no-webgl .hero-inner{padding-top:22vh}
   <a href="#experience"><span class="lbl">CLUSTER</span><i></i></a>
   <a href="#skills"><span class="lbl">RACKS</span><i></i></a>
   <a href="#projects"><span class="lbl">OUTPUTS</span><i></i></a>
+  <a href="#blog"><span class="lbl">BLOG</span><i></i></a>
   <a href="#contact"><span class="lbl">RESPONSE</span><i></i></a>
 </nav>
 
@@ -526,6 +541,18 @@ html.no-webgl .hero-inner{padding-top:22vh}
       </div>
       <div class="pj-more" data-reveal>
         <a class="btn" href="https://github.com/majipa007?tab=repositories" target="_blank" rel="noopener">FULL REGISTRY — GITHUB.COM/MAJIPA007 <span class="arr">→</span></a>
+      </div>
+      <div class="te-panel panel" id="blog" data-reveal>
+        <div class="te-head">
+          <h3>TRACE EXPORTS — WRITING</h3>
+          <span class="te-path">/var/log/blog · medium.com/@sulavstha007</span>
+        </div>
+        <a class="te-row" href="https://shorturl.at/eoPbo" target="_blank" rel="noopener">
+          <span class="te-k">POST 001</span>
+          <span class="te-t">A Guide to Quantize YOLOv8 Object Detection Models Using ONNX</span>
+          <span class="te-tag">ONNX · QUANTIZATION · READ ↗</span>
+        </a>
+        <a class="te-more" href="https://medium.com/@sulavstha007" target="_blank" rel="noopener">MORE WRITING ON MEDIUM →</a>
       </div>
     </div>
   </section>
@@ -1272,10 +1299,11 @@ if (!REDUCED && window.gsap && window.ScrollTrigger){
 
 /* nav rail clicks + active state */
 const railLinks = [...document.querySelectorAll('.rail a')];
-railLinks.forEach((a, i) => {
+railLinks.forEach((a) => {
   a.addEventListener('click', (e) => {
     e.preventDefault();
-    const target = sections[i];
+    const target = document.getElementById(a.getAttribute('href').slice(1));
+    if (!target) return;
     if (window.__lenis) window.__lenis.scrollTo(target, { offset: 0, duration: 1.6 });
     else target.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth' });
   });
@@ -1319,7 +1347,7 @@ function hudTick(){
     lastStage = stage;
     if (els.stage) els.stage.textContent = STAGES[stage];
     if (els.ep) els.ep.innerHTML = ENDPOINTS[stage];
-    railLinks.forEach((a, i) => a.classList.toggle('active', i === stage));
+    railLinks.forEach((a) => a.classList.toggle('active', a.getAttribute('href') === '#' + SEC_IDS[stage]));
   }
   if (els.prog){
     const y = window.__lenis ? window.__lenis.scroll : (window.scrollY || 0);

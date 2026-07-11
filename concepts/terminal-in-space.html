@@ -337,11 +337,12 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;font-size:11.5p
     <li><a href="#experience" data-sec="2"><span class="dollar">$ </span>cd ~/experience</a></li>
     <li><a href="#skills" data-sec="3"><span class="dollar">$ </span>cd ~/skills</a></li>
     <li><a href="#projects" data-sec="4"><span class="dollar">$ </span>ls projects/</a></li>
-    <li><a href="#contact" data-sec="5"><span class="dollar">$ </span>cat contact.txt</a></li>
+    <li><a href="#blog" data-sec="5"><span class="dollar">$ </span>cat ~/blog.md</a></li>
+    <li><a href="#contact" data-sec="6"><span class="dollar">$ </span>cat contact.txt</a></li>
   </ul>
 </nav>
 
-<div id="sec-ind" aria-hidden="true"><b>[01/06]</b> ~/</div>
+<div id="sec-ind" aria-hidden="true"><b>[01/07]</b> ~/</div>
 
 <main id="main">
 
@@ -510,10 +511,22 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;font-size:11.5p
     </div>
   </section>
 
+  <!-- BLOG -->
+  <section class="sec" id="blog" aria-labelledby="bl-h">
+    <div class="wrap">
+      <p class="cmdline rv"><span class="pr">sks@portfolio:~/projects$</span> cat ~/blog.md</p>
+      <h2 id="bl-h" class="rv"><span class="hash">#</span> Blog</h2>
+      <div class="ct-rows panel-box rv" style="padding:0 26px;">
+        <a href="https://shorturl.at/eoPbo" target="_blank" rel="noopener"><span class="k">POST [01]</span><span class="v">A Guide to Quantize YOLOv8 Object Detection Models Using ONNX</span></a>
+        <a href="https://medium.com/@sulavstha007" target="_blank" rel="noopener" style="border-bottom:0;"><span class="k">MEDIUM</span><span class="v">More writing on Medium →</span></a>
+      </div>
+    </div>
+  </section>
+
   <!-- CONTACT -->
   <section class="sec" id="contact" aria-labelledby="ct-h">
     <div class="wrap">
-      <p class="cmdline rv"><span class="pr">sks@portfolio:~/projects$</span> cat contact.txt</p>
+      <p class="cmdline rv"><span class="pr">sks@portfolio:~/blog$</span> cat contact.txt</p>
       <h2 id="ct-h" class="rv"><span class="hash">#</span> Contact</h2>
       <div class="ct-rows panel-box rv" style="padding:0 26px;">
         <a href="mailto:sulavstha007@gmail.com"><span class="k">EMAIL</span><span class="v">sulavstha007@gmail.com</span></a>
@@ -566,7 +579,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;font-size:11.5p
     sections: []
   };
 
-  var secEls = ['hero','about','experience','skills','projects','contact'].map(function(id){ return document.getElementById(id); });
+  var secEls = ['hero','about','experience','skills','projects','blog','contact'].map(function(id){ return document.getElementById(id); });
   APP.sections = secEls;
 
   /* ---------- boot preloader ---------- */
@@ -664,6 +677,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;font-size:11.5p
     { path:'~/experience', cmd:'ls -la ~/experience/',          out:'total 2 :: incorp/  sprhava/' },
     { path:'~/skills',     cmd:'tree ~/skills/',                out:'4 directories, 24 files, 0 errors' },
     { path:'~/projects',   cmd:'ls projects/ | head -6',        out:'6 repos :: ★34 combined' },
+    { path:'~/blog',       cmd:'cat ~/blog.md',                 out:'1 featured post :: more on medium' },
     { path:'~',            cmd:'cat contact.txt',               out:'4 lines — channels open, say hi' }
   ];
   var tCmd = document.getElementById('t-cmd');
@@ -703,12 +717,12 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;font-size:11.5p
   /* ---------- active section tracking ---------- */
   var navLinks = [].slice.call(document.querySelectorAll('#topnav a[data-sec]'));
   var secInd = document.getElementById('sec-ind');
-  var secNames = ['~/', '~/about', '~/experience', '~/skills', '~/projects', 'contact.txt'];
+  var secNames = ['~/', '~/about', '~/experience', '~/skills', '~/projects', '~/blog.md', 'contact.txt'];
   function setActive(i){
     if (APP.activeIndex === i) return;
     APP.activeIndex = i;
     navLinks.forEach(function(a){ a.classList.toggle('active', +a.dataset.sec === i); });
-    if (secInd) secInd.innerHTML = '<b>[0' + (i + 1) + '/06]</b> ' + secNames[i];
+    if (secInd) secInd.innerHTML = '<b>[0' + (i + 1) + '/07]</b> ' + secNames[i];
     typeCommand(i);
     APP.emit('section', i);
   }
@@ -900,6 +914,7 @@ function init(){
     { t: [ 0.8,  0.2,  -44], o: [ 0.9, 0.6, 11.0] },  // experience
     { t: [-0.8, -0.1,  -66], o: [-0.7, 0.0,  9.0] },  // skills
     { t: [ 0.8,  0.1,  -88], o: [ 0.6, 0.7, 11.5] },  // projects
+    { t: [-0.9,  0.1, -100], o: [-0.6, 0.4,  9.5] },  // blog
     { t: [ 0.0,  0.0, -110], o: [ 0.0, 0.2,  9.0] }   // contact
   ];
 
@@ -955,6 +970,10 @@ function init(){
       -90 - (i % 3) * 1.6,
       (Math.random() - .5) * 0.4);
   }
+
+  // BLOG — reading slab tilted like an open ledger
+  slab(4.2, 2.5, 0.45, -0.9, 0.2, -100.8, 0.14);
+  slab(0.9, 0.9, 0.9,  2.8, -1.4, -102.6, 0.5);
 
   // CONTACT — final slab + beacon cube
   slab(4.6, 2.7, 0.5, 0, 0.1, -111.8, 0.05);
