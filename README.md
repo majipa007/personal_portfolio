@@ -1,16 +1,39 @@
-# React + Vite
+# Inside the Model — Portfolio
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Personal portfolio of **Sulav Kumar Shrestha**, AI Systems Engineer.
 
-Currently, two official plugins are available:
+The whole site is a single `index.html`: one continuous WebGL scene that flies a
+camera through the interior of a stylized neural network. Scrolling moves the
+camera along a choreographed path; each section is a station inside the model.
+A single GPU particle system (~200k points on desktop, ~40k on mobile) morphs
+between six precomputed states — hero typography, embedding cloud, activated
+neurons, attention-head constellations, project output heads, and a final
+converge-and-burst contact token. The particles never disappear; they reorganize.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Stack
 
-## React Compiler
+- [Three.js](https://threejs.org) via CDN importmap — custom GLSL vertex/fragment
+  shaders for the particle morph system (no particle libraries)
+- [GSAP](https://gsap.com) + ScrollTrigger for camera choreography and reveals
+- [Lenis](https://lenis.darkroom.engineering) for smooth scrolling
+- No build step, no dependencies to install — everything lives in `index.html`
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Run
 
-## Expanding the ESLint configuration
+Serve the file over HTTP (module scripts + font loading behave best that way):
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```sh
+python3 -m http.server 8000
+# open http://localhost:8000
+```
+
+Any static host (GitHub Pages, Netlify, Vercel) can deploy it as-is.
+
+## Quality floor
+
+- All particle animation runs in the vertex shader; the CPU only updates uniforms
+- Device pixel ratio capped at 1.75; an FPS probe halves the particle count and
+  disables postprocessing on weak devices
+- `prefers-reduced-motion` renders static per-section states with instant reveals
+- No WebGL → the canvas hides and the content stands alone as a dark editorial page
+- Semantic HTML, keyboard-reachable interactive elements, visible focus styles
