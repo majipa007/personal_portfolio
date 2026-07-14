@@ -1,1637 +1,1234 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sulav Kumar Shrestha — AI Systems Engineer</title>
-<meta name="description" content="AI Systems Engineer building intelligent systems at the intersection of LLMs, inference optimization & cloud infrastructure." />
-<meta property="og:title" content="Sulav Kumar Shrestha — AI Systems Engineer" />
-<meta property="og:description" content="Inside the Model — a journey through a neural network. LLM serving, inference systems, and cost-aware AI infrastructure." />
-<meta property="og:type" content="website" />
-<meta name="theme-color" content="#050505" />
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23050505'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23E8A33D'/%3E%3C/svg%3E" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
-
+<meta name="description" content="Building intelligent systems at the intersection of LLMs, inference optimization &amp; cloud infrastructure.">
+<meta property="og:title" content="Sulav Kumar Shrestha — AI Systems Engineer">
+<meta property="og:description" content="Building intelligent systems at the intersection of LLMs, inference optimization &amp; cloud infrastructure.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#050505">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
 <style>
-/* ============================================================
-   INSIDE THE MODEL — visual system
-   void #050505 · bone #EDEAE4 · structure #3A3A3A · signal #E8A33D
-   ============================================================ */
-:root {
-  --void: #050505;
-  --bone: #EDEAE4;
-  --grey: #3A3A3A;
-  --amber: #E8A33D;
-  --serif: "Instrument Serif", Georgia, serif;
-  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-  --sans: "Inter", system-ui, -apple-system, sans-serif;
+:root{
+  --bg:#050505;
+  --panel:#0a0a09;
+  --ink:#c9c9c0;
+  --dim:#71716a;
+  --faint:#3a3a34;
+  --grn:#4af626;
+  --grn-dim:#2c9e1a;
+  --border:#26261f;
+  --mono:'JetBrains Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 }
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: auto; }
-html.lenis, html.lenis body { height: auto; }
-.lenis.lenis-smooth { scroll-behavior: auto !important; }
-body {
-  background: var(--void);
-  color: var(--bone);
-  font-family: var(--sans);
-  font-size: 16px;
-  line-height: 1.6;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0 !important;}
+html{scroll-behavior:auto;}
+html.lenis,html.lenis body{height:auto;}
+.lenis.lenis-smooth{scroll-behavior:auto !important;}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--mono);
+  font-size:15px;
+  line-height:1.6;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
 }
-::selection { background: var(--amber); color: var(--void); }
-a { color: inherit; text-decoration: none; }
-button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
-:focus { outline: none; }
-:focus-visible { outline: 1px solid var(--amber); outline-offset: 4px; }
-
-/* ---- canvas & overlays ---- */
-#gl {
-  position: fixed; inset: 0; width: 100%; height: 100%;
-  display: block; z-index: 0;
-}
-.no-webgl #gl { display: none; }
-#tethers {
-  position: fixed; inset: 0; width: 100%; height: 100%;
-  z-index: 1; pointer-events: none;
-}
-main { position: relative; z-index: 2; }
-
-/* ---- preloader ---- */
-#preloader {
-  position: fixed; inset: 0; z-index: 60;
-  background: var(--void);
-  display: flex; align-items: center; justify-content: center;
-}
-#preloader pre {
-  font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em;
-  color: var(--bone); opacity: 0.85; line-height: 2;
-}
-#preloader .amber { color: var(--amber); }
-
-/* ---- custom cursor ---- */
-#cursor, #ring { display: none; }
-@media (pointer: fine) {
-  #cursor {
-    display: block; position: fixed; z-index: 70; pointer-events: none;
-    width: 5px; height: 5px; border-radius: 50%;
-    background: var(--bone); top: 0; left: 0;
-    will-change: transform;
-  }
-  #ring {
-    display: block; position: fixed; z-index: 70; pointer-events: none;
-    width: 30px; height: 30px; border-radius: 50%;
-    border: 1px solid rgba(237, 234, 228, 0.35);
-    top: 0; left: 0; will-change: transform;
-    transition: border-color 0.25s;
-  }
-  #ring.hot { border-color: var(--amber); }
-  html.has-cursor, html.has-cursor a, html.has-cursor button { cursor: none; }
+::selection{background:var(--grn);color:#000;}
+a{color:inherit;text-decoration:none;}
+a:focus-visible,button:focus-visible,[tabindex]:focus-visible{outline:1px solid var(--grn);outline-offset:3px;}
+@media (pointer:fine){
+  body.cursor-on, body.cursor-on a, body.cursor-on button{cursor:none;}
 }
 
-/* ---- nav ---- */
-.nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 40;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 20px 4vw;
-  transition: background 0.5s, backdrop-filter 0.5s;
+/* ---------- scanline / CRT undertone ---------- */
+body::after{
+  content:"";position:fixed;inset:0;z-index:500;pointer-events:none;
+  background:repeating-linear-gradient(0deg, rgba(0,0,0,.22) 0px, rgba(0,0,0,.22) 1px, transparent 1px, transparent 3px);
+  opacity:.28;
 }
-.nav.scrolled {
-  background: rgba(5, 5, 5, 0.55);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-.nav .brand {
-  font-family: var(--serif); font-size: 22px; letter-spacing: 0.04em;
-}
-.nav nav { display: flex; align-items: center; gap: 26px; }
-.nav nav a, .nav nav button {
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
-  color: rgba(237, 234, 228, 0.62);
-  position: relative; padding: 4px 0;
-  transition: color 0.3s;
-}
-.nav nav a:hover, .nav nav button:hover { color: var(--bone); }
-.nav nav a::after {
-  content: ""; position: absolute; left: 0; bottom: 0;
-  width: 100%; height: 1px; background: var(--amber);
-  transform: scaleX(0); transform-origin: left;
-  transition: transform 0.35s cubic-bezier(0.65, 0, 0.35, 1);
-}
-.nav nav a.active { color: var(--bone); }
-.nav nav a.active::after { transform: scaleX(1); }
-#snd[aria-pressed="true"] { color: var(--amber); }
 
-/* ---- HUD ---- */
-.hud {
-  position: fixed; z-index: 30; pointer-events: none;
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
-  color: rgba(237, 234, 228, 0.34);
-}
-#hud-layer { left: 4vw; bottom: 24px; }
-#hud-tokens { right: 4vw; bottom: 24px; text-align: right; }
-#hud-latency { right: 4vw; top: 72px; color: rgba(232, 163, 61, 0.7); }
-.no-webgl .hud { display: none; }
+/* ---------- skip link ---------- */
+.skip{position:fixed;top:-60px;left:16px;z-index:2000;background:#000;color:var(--grn);border:1px solid var(--grn);padding:8px 14px;font-size:12px;transition:top .15s;}
+.skip:focus{top:12px;}
 
-/* ---- sections / journey ---- */
-section { position: relative; }
-.wrap { max-width: 1280px; margin: 0 auto; padding: 0 6vw; width: 100%; }
-.eyebrow {
-  font-family: var(--mono); font-size: 11px; letter-spacing: 0.34em;
-  color: var(--amber);
+/* ---------- canvas ---------- */
+#glcanvas{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block;}
+body.no-webgl #glcanvas{display:none;}
+
+/* no-webgl fallback texture: dotted void */
+body.no-webgl{
+  background-image:radial-gradient(rgba(74,246,38,.06) 1px, transparent 1px), radial-gradient(rgba(200,200,190,.05) 1px, transparent 1px);
+  background-size:90px 90px, 47px 47px;
+  background-position:0 0, 23px 31px;
 }
-.sec-head {
-  font-family: var(--serif); font-weight: 400;
-  font-size: clamp(44px, 6vw, 92px);
-  line-height: 1.02; letter-spacing: 0.005em;
+body.no-webgl .panel-box{background:var(--panel);}
+
+/* ---------- custom cursor ---------- */
+#cursor{
+  position:fixed;top:0;left:0;width:12px;height:12px;background:var(--grn);
+  z-index:1200;pointer-events:none;mix-blend-mode:difference;display:none;
+  transform:translate(-100px,-100px);
 }
-.mask { overflow: hidden; display: block; }
-.mask .mask-inner { display: block; will-change: transform; }
+#cursor.hov{width:26px;height:26px;background:transparent;border:1px solid var(--grn);mix-blend-mode:normal;}
+body.cursor-on #cursor{display:block;}
+
+/* ---------- preloader ---------- */
+#preloader{
+  position:fixed;inset:0;z-index:1000;background:#020202;
+  display:flex;align-items:center;justify-content:center;
+}
+#preloader .boot{
+  width:min(680px, calc(100vw - 48px));
+  border:1px solid var(--border);
+  padding:28px 30px;font-size:13px;line-height:1.85;color:var(--dim);
+  background:#040404;
+}
+#preloader .boot .bt{color:var(--ink);letter-spacing:.06em;}
+#preloader .boot .ok{color:var(--grn);}
+#boot-lines{min-height:172px;}
+#boot-lines div{white-space:nowrap;overflow:hidden;}
+#boot-bar{border:1px solid var(--faint);height:14px;margin-top:12px;position:relative;}
+#boot-bar-fill{position:absolute;inset:1px auto 1px 1px;width:0%;background:var(--grn);transition:width .25s steps(12);}
+#boot-pct{color:var(--grn);}
+#preloader.done{pointer-events:none;}
+
+/* ---------- top nav ---------- */
+#topnav{
+  position:fixed;top:0;left:0;right:0;z-index:100;height:52px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;border-bottom:1px solid var(--border);
+  background:#050505;
+}
+.nav-brand{font-size:13px;font-weight:700;color:var(--grn);letter-spacing:.04em;white-space:nowrap;}
+.nav-brand .tilde{color:var(--dim);font-weight:400;}
+.nav-links{display:flex;gap:4px;list-style:none;overflow-x:auto;scrollbar-width:none;}
+.nav-links::-webkit-scrollbar{display:none;}
+.nav-links a{
+  display:block;padding:6px 12px;font-size:12px;color:var(--dim);
+  border:1px solid transparent;white-space:nowrap;
+}
+.nav-links a:hover{color:var(--grn);border-color:var(--faint);}
+.nav-links a.active{color:#000;background:var(--grn);border-color:var(--grn);font-weight:700;}
+.nav-links a .dollar{opacity:.55;}
+
+/* ---------- section indicator ---------- */
+#sec-ind{
+  position:fixed;left:24px;bottom:120px;z-index:90;font-size:11px;color:var(--dim);
+  letter-spacing:.12em;writing-mode:vertical-rl;transform:rotate(180deg);
+  border-left:1px solid var(--border);padding-left:10px;
+}
+#sec-ind b{color:var(--grn);font-weight:700;}
+
+/* ---------- terminal strip ---------- */
+#term{
+  position:fixed;left:0;right:0;bottom:0;z-index:100;
+  border-top:1px solid var(--border);
+  background:#040404;
+  display:flex;align-items:stretch;justify-content:space-between;
+  padding:10px 24px;min-height:88px;gap:24px;
+}
+.t-left{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;}
+#t-hist{font-size:11px;color:var(--dim);line-height:1.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#t-hist .h-out{color:var(--faint);}
+.t-line{font-size:13px;color:var(--ink);white-space:nowrap;overflow:hidden;}
+.t-prompt{color:var(--grn);font-weight:700;}
+#t-cmd{color:var(--ink);}
+.t-cursor{display:inline-block;width:.62em;height:1.05em;background:var(--grn);vertical-align:text-bottom;animation:blink 1.06s steps(1) infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+#hud{
+  display:flex;flex-direction:column;justify-content:center;gap:2px;
+  font-size:10.5px;color:var(--dim);text-align:right;border-left:1px solid var(--border);
+  padding-left:24px;letter-spacing:.05em;white-space:nowrap;
+}
+#hud b{color:var(--grn);font-weight:500;}
+
+/* ---------- sections ---------- */
+main{position:relative;z-index:10;}
+.sec{
+  min-height:100vh;min-height:100svh;
+  display:flex;align-items:center;
+  padding:110px 0 150px;
+  position:relative;
+}
+.wrap{width:100%;max-width:1240px;margin:0 auto;padding:0 48px;}
+.cmdline{
+  font-size:12.5px;color:var(--grn);margin-bottom:20px;letter-spacing:.03em;
+  display:inline-block;border:1px solid var(--border);padding:7px 13px;background:rgba(4,4,4,.72);
+}
+.cmdline .pr{color:var(--dim);}
+h2{
+  font-size:clamp(2rem, 4.6vw, 3.4rem);font-weight:800;letter-spacing:-.02em;line-height:1;
+  color:var(--ink);margin-bottom:26px;text-transform:uppercase;
+}
+h2 .hash{color:var(--faint);}
+.panel-box{border:1px solid var(--border);background:rgba(6,6,5,.88);}
 
 /* HERO */
-#hero {
-  min-height: 100vh;
-  display: flex; align-items: center;
+#hero .wrap{max-width:1240px;}
+.hero-boot{font-size:13px;color:var(--dim);margin-bottom:16px;}
+.hero-boot .ok{color:var(--grn);}
+h1{
+  font-size:clamp(3.1rem, min(10.5vw, 14.5vh), 7.7rem);
+  font-weight:800;line-height:.94;letter-spacing:-.035em;
+  color:#d7d7cd;text-transform:uppercase;
+  text-shadow:0 2px 0 rgba(0,0,0,.95), 0 -1px 0 rgba(255,255,255,.07);
 }
-#hero .wrap { text-align: center; }
-#hero h1 {
-  font-family: var(--serif); font-weight: 400;
-  font-size: clamp(52px, 10.5vw, 170px);
-  line-height: 0.98; letter-spacing: 0.005em;
-  margin: 26px 0 30px;
+.role{
+  display:inline-block;margin-top:20px;padding:9px 16px;
+  border:1px solid var(--grn);color:var(--grn);
+  font-size:clamp(.85rem, 1.7vw, 1.15rem);font-weight:700;letter-spacing:.22em;
 }
-#hero .sub {
-  font-size: clamp(15px, 1.35vw, 19px);
-  color: rgba(237, 234, 228, 0.78);
-  max-width: 560px; margin: 0 auto 42px;
+.tagline{margin-top:18px;max-width:560px;color:var(--dim);font-size:clamp(.9rem, 1.6vw, 1.05rem);}
+.tagline em{color:var(--ink);font-style:normal;}
+.scrollhint{
+  margin-top:30px;font-size:12px;color:var(--dim);display:inline-flex;gap:12px;align-items:center;
+  border:1px solid var(--border);padding:8px 14px;background:rgba(4,4,4,.6);
 }
-.btn-row { display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; }
-.btn {
-  font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em;
-  padding: 15px 34px; border: 1px solid var(--grey);
-  color: var(--bone); display: inline-block;
-  transition: border-color 0.35s, color 0.35s, background 0.35s;
-}
-.btn:hover { border-color: var(--amber); color: var(--amber); }
-.btn.solid { background: var(--bone); color: var(--void); border-color: var(--bone); }
-.btn.solid:hover { background: var(--amber); border-color: var(--amber); color: var(--void); }
-.scroll-hint {
-  position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.24em;
-  color: rgba(237, 234, 228, 0.4);
-  animation: pulse 2.6s ease-in-out infinite;
-}
-@keyframes pulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 0.9; } }
-@media (prefers-reduced-motion: reduce) { .scroll-hint { animation: none; } }
+.scrollhint .arr{color:var(--grn);animation:hop 1.6s ease-in-out infinite;display:inline-block;}
+@keyframes hop{0%,100%{transform:translateY(-2px);}50%{transform:translateY(3px);}}
 
 /* ABOUT */
-#about { min-height: 130vh; display: flex; align-items: center; padding: 18vh 0; }
-.about-grid {
-  display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
-  gap: clamp(40px, 6vw, 110px); align-items: start;
+.about-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:18px;align-items:start;}
+.bio{padding:26px 28px;font-size:clamp(.92rem, 1.4vw, 1.02rem);color:var(--ink);}
+.bio p+p{margin-top:14px;}
+.bio .cm{color:var(--faint);}
+.side-stack{display:flex;flex-direction:column;gap:18px;}
+.mini{padding:18px 22px;}
+.mini h3{font-size:11px;letter-spacing:.22em;color:var(--grn);font-weight:700;margin-bottom:10px;}
+.mini ul{list-style:none;font-size:12.5px;color:var(--ink);}
+.mini li{padding:4px 0 4px 2.6em;text-indent:-2.6em;border-bottom:1px solid var(--border);}
+.mini li:last-child{border-bottom:0;}
+.mini li::before{content:"├── ";color:var(--faint);}
+.mini li:last-child::before{content:"└── ";}
+.links-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px;}
+.links-row a{
+  border:1px solid var(--border);padding:10px 16px;font-size:12.5px;color:var(--dim);
+  display:inline-flex;gap:10px;align-items:baseline;background:rgba(4,4,4,.6);
 }
-.about-copy p {
-  font-size: clamp(16px, 1.35vw, 19px);
-  color: rgba(237, 234, 228, 0.82);
-  margin-top: 28px; max-width: 62ch;
-}
-.interests { list-style: none; margin-top: 36px; }
-.interests li {
-  font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em;
-  color: rgba(237, 234, 228, 0.62);
-  padding: 13px 2px; border-top: 1px solid rgba(58, 58, 58, 0.6);
-  transition: color 0.3s, padding-left 0.3s;
-}
-.interests li:last-child { border-bottom: 1px solid rgba(58, 58, 58, 0.6); }
-.interests li:hover { color: var(--amber); padding-left: 10px; }
-.panel {
-  border: 1px solid rgba(58, 58, 58, 0.7);
-  background: rgba(10, 10, 10, 0.55);
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  padding: 30px 28px;
-}
-.panel h3 {
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.3em;
-  font-weight: 400; color: var(--amber); margin-bottom: 18px;
-}
-.panel ul { list-style: none; }
-.panel ul li {
-  font-size: 14px; color: rgba(237, 234, 228, 0.78);
-  padding: 8px 0; border-top: 1px solid rgba(58, 58, 58, 0.4);
-}
-.chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
-.chip {
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
-  border: 1px solid rgba(58, 58, 58, 0.8);
-  padding: 8px 14px; color: rgba(237, 234, 228, 0.66);
-  transition: border-color 0.3s, color 0.3s;
-}
-.chip:hover { border-color: var(--amber); color: var(--amber); }
-.chip span { margin-left: 6px; }
+.links-row a b{color:var(--ink);font-weight:700;letter-spacing:.08em;}
+.links-row a:hover{border-color:var(--grn);color:var(--grn);}
+.links-row a:hover b{color:var(--grn);}
 
 /* EXPERIENCE */
-#experience { min-height: 150vh; padding: 22vh 0; }
-.exp-cards { margin-top: 9vh; display: flex; flex-direction: column; gap: 12vh; }
-.exp-card {
-  border: 1px solid rgba(58, 58, 58, 0.7);
-  background: rgba(9, 9, 9, 0.62);
-  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-  padding: 40px 42px; max-width: 620px;
-}
-.exp-card:nth-child(2) { align-self: flex-end; }
-.exp-meta {
-  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em;
-  color: rgba(237, 234, 228, 0.45); margin-bottom: 14px;
-}
-.exp-card h3 { font-family: var(--serif); font-weight: 400; font-size: clamp(26px, 2.6vw, 38px); line-height: 1.1; }
-.exp-role { font-family: var(--mono); font-size: 11px; letter-spacing: 0.2em; color: var(--amber); margin: 10px 0 20px; }
-.exp-card ul { list-style: none; }
-.exp-card ul li {
-  font-size: 14.5px; color: rgba(237, 234, 228, 0.76);
-  padding: 9px 0 9px 20px; position: relative;
-  border-top: 1px solid rgba(58, 58, 58, 0.35);
-}
-.exp-card ul li::before { content: "—"; position: absolute; left: 0; color: var(--grey); }
-.exp-card .stack { font-family: var(--mono); font-size: 11px; letter-spacing: 0.05em; color: rgba(237, 234, 228, 0.45); }
+.xp-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+.xp{padding:30px 32px;display:flex;flex-direction:column;}
+.xp .perm{font-size:11px;color:var(--faint);letter-spacing:.06em;margin-bottom:12px;}
+.xp h3{font-size:clamp(1.5rem, 2.6vw, 2.1rem);font-weight:800;letter-spacing:-.01em;color:var(--ink);text-transform:uppercase;}
+.xp .meta{font-size:12px;color:var(--grn);margin:8px 0 20px;letter-spacing:.06em;}
+.xp .meta .sep{color:var(--faint);}
+.xp ul{list-style:none;font-size:13.5px;color:var(--ink);flex:1;}
+.xp li{padding:9px 0;border-top:1px solid var(--border);}
+.xp li::before{content:"» ";color:var(--grn);}
+.xp li b{color:var(--grn);font-weight:700;}
+.stack{margin-top:20px;display:flex;flex-wrap:wrap;gap:8px;}
+.stack span{border:1px solid var(--faint);padding:3px 9px;font-size:11px;color:var(--dim);letter-spacing:.04em;}
 
 /* SKILLS */
-#skills { min-height: 130vh; display: flex; align-items: center; padding: 18vh 0; }
-.skill-grid {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: clamp(30px, 4vw, 70px); margin-top: 8vh;
-}
-.skill-group h3 {
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.32em;
-  font-weight: 400; color: rgba(237, 234, 228, 0.45);
-  padding-bottom: 14px; border-bottom: 1px solid rgba(58, 58, 58, 0.7);
-}
-.skill-group h3 em { font-style: normal; color: var(--amber); margin-right: 10px; }
-.skill-group ul { list-style: none; display: flex; flex-wrap: wrap; gap: 8px 22px; padding-top: 16px; }
-.skill-group li {
-  font-size: 15px; color: rgba(237, 234, 228, 0.75);
-  transition: color 0.25s; cursor: default;
-}
-.skill-group li:hover { color: var(--amber); }
+.sk-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;}
+.skill-cat{padding:24px 26px;transition:border-color .15s, box-shadow .15s;}
+.skill-cat:hover{border-color:var(--grn);box-shadow:0 0 0 1px var(--grn) inset;}
+.skill-cat h3{font-size:12px;letter-spacing:.2em;color:var(--grn);font-weight:700;margin-bottom:6px;}
+.skill-cat .path{font-size:11px;color:var(--faint);margin-bottom:16px;word-break:break-all;}
+.skill-cat ul{list-style:none;font-size:13px;}
+.skill-cat li{padding:4px 0 4px 2.6em;text-indent:-2.6em;color:var(--ink);}
+.skill-cat li::before{content:"├── ";color:var(--faint);}
+.skill-cat li:last-child::before{content:"└── ";}
+.tree-sum{margin-top:26px;font-size:12px;color:var(--dim);}
+.tree-sum b{color:var(--grn);font-weight:500;}
 
 /* PROJECTS */
-#projects { min-height: 170vh; padding: 22vh 0; }
-.proj-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 22px; margin-top: 9vh; perspective: 1200px;
+.pj-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
+.pj{
+  padding:24px 26px;display:flex;flex-direction:column;min-height:212px;
+  transition:border-color .15s, transform .15s;
 }
-.proj-card {
-  border: 1px solid rgba(58, 58, 58, 0.7);
-  background: rgba(9, 9, 9, 0.6);
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  padding: 28px 26px; display: flex; flex-direction: column; gap: 14px;
-  min-height: 230px; transform-style: preserve-3d;
-  transition: border-color 0.35s;
-  will-change: transform;
-}
-.proj-card:hover { border-color: rgba(232, 163, 61, 0.55); }
-.proj-card h3 { font-family: var(--serif); font-weight: 400; font-size: 23px; line-height: 1.15; transform: translateZ(24px); }
-.proj-card p { font-size: 13.5px; color: rgba(237, 234, 228, 0.66); flex: 1; transform: translateZ(14px); }
-.proj-meta {
-  display: flex; gap: 16px; align-items: center;
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em;
-  color: rgba(237, 234, 228, 0.45); transform: translateZ(10px);
-}
-.proj-meta .lang::before {
-  content: ""; display: inline-block; width: 7px; height: 7px;
-  border-radius: 50%; background: var(--grey); margin-right: 7px;
-  vertical-align: 1px;
-}
-.proj-card:hover .proj-meta .lang::before { background: var(--amber); }
-.blog-link {
-  display: inline-block; margin-top: 8vh;
-  font-family: var(--mono); font-size: 12px; letter-spacing: 0.26em;
-  color: rgba(237, 234, 228, 0.66); border-bottom: 1px solid var(--grey);
-  padding-bottom: 6px; transition: color 0.3s, border-color 0.3s;
-}
-.blog-link:hover { color: var(--amber); border-color: var(--amber); }
+.pj:hover{border-color:var(--grn);transform:translateY(-4px);}
+.pj .idx{font-size:11px;color:var(--faint);letter-spacing:.14em;}
+.pj h3{font-size:1.06rem;font-weight:700;color:var(--ink);margin:10px 0 10px;word-break:break-word;line-height:1.35;}
+.pj:hover h3{color:var(--grn);}
+.pj p{font-size:12.5px;color:var(--dim);flex:1;}
+.pj .foot{margin-top:18px;display:flex;justify-content:space-between;gap:10px;font-size:11.5px;color:var(--dim);border-top:1px solid var(--border);padding-top:12px;flex-wrap:wrap;}
+.pj .foot .lang{color:var(--ink);}
+.pj .foot .st{color:var(--grn);white-space:nowrap;}
+.pj .arrow{color:var(--grn);}
+.pj-more{margin-top:26px;font-size:12px;color:var(--dim);}
+.pj-more a{color:var(--grn);border-bottom:1px solid var(--grn-dim);}
 
 /* CONTACT */
-#contact { min-height: 120vh; display: flex; align-items: center; padding: 16vh 0 8vh; }
-#contact .sec-head { font-size: clamp(48px, 7.5vw, 120px); }
-#contact .sub { color: rgba(237, 234, 228, 0.72); margin-top: 26px; max-width: 54ch; font-size: clamp(15px, 1.3vw, 18px); }
-.contact-rows { margin-top: 9vh; }
-.contact-row {
-  display: flex; align-items: baseline; justify-content: space-between;
-  width: 100%; text-align: left; gap: 20px;
-  padding: 22px 2px; border-top: 1px solid rgba(58, 58, 58, 0.65);
-  transition: padding-left 0.3s;
+#contact .wrap{max-width:980px;}
+.ct-rows{border-top:1px solid var(--border);}
+.ct-rows a{
+  display:flex;justify-content:space-between;align-items:baseline;gap:18px;
+  padding:22px 8px;border-bottom:1px solid var(--border);
+  font-size:clamp(1rem, 2.7vw, 1.9rem);font-weight:700;letter-spacing:-.01em;
 }
-.contact-rows .contact-row:last-of-type { border-bottom: 1px solid rgba(58, 58, 58, 0.65); }
-.contact-row:hover { padding-left: 12px; }
-.contact-row .label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.3em; color: rgba(237, 234, 228, 0.42); min-width: 110px; }
-.contact-row .value {
-  font-family: var(--serif); font-size: clamp(19px, 2.4vw, 32px);
-  flex: 1; transition: color 0.3s;
-}
-.contact-row:hover .value { color: var(--amber); }
-.contact-row .hint { font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; color: rgba(237, 234, 228, 0.3); }
-.contact-row .ext {
-  font-family: var(--mono); font-size: 11px; color: rgba(237, 234, 228, 0.4);
-  padding: 4px 8px;
-}
-.contact-row .ext:hover { color: var(--amber); }
+.ct-rows a .k{font-size:11px;letter-spacing:.24em;color:var(--dim);font-weight:400;flex-shrink:0;}
+.ct-rows a .v{color:var(--ink);text-align:right;word-break:break-all;}
+.ct-rows a:hover .v{color:var(--grn);}
+.exitline{margin-top:44px;font-size:13px;color:var(--dim);}
+.exitline .pr{color:var(--grn);font-weight:700;}
+.exitline .t-cursor{margin-left:2px;}
+footer{padding:28px 0 140px;position:relative;z-index:10;}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;font-size:11.5px;color:var(--faint);flex-wrap:wrap;border-top:1px solid var(--border);padding-top:22px;}
 
-footer {
-  position: relative; z-index: 2;
-  padding: 40px 4vw 32px;
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em;
-  color: rgba(237, 234, 228, 0.3); text-align: center;
-}
+/* reveal initial states applied by JS only */
+.rv,.hv{will-change:transform,opacity;}
 
-/* toast */
-#toast {
-  position: fixed; bottom: 60px; left: 50%;
-  transform: translate(-50%, 20px); opacity: 0;
-  z-index: 55; pointer-events: none;
-  font-family: var(--mono); font-size: 11px; letter-spacing: 0.24em;
-  color: var(--void); background: var(--amber);
-  padding: 10px 22px;
+@media (max-width:1020px){
+  .sk-grid{grid-template-columns:repeat(2,1fr);}
+  .pj-grid{grid-template-columns:repeat(2,1fr);}
 }
-
-/* ---- no-webgl fallback dignity ---- */
-.no-webgl body, .no-webgl section { background: var(--void); }
-.no-webgl .panel, .no-webgl .exp-card, .no-webgl .proj-card { background: #0a0a0a; }
-
-/* ---- responsive ---- */
-@media (max-width: 960px) {
-  .about-grid { grid-template-columns: 1fr; }
-  .proj-grid { grid-template-columns: 1fr 1fr; }
-  .exp-card { max-width: 100%; }
+@media (max-width:820px){
+  .wrap{padding:0 22px;}
+  .about-grid,.xp-grid{grid-template-columns:1fr;}
+  #sec-ind{display:none;}
+  #hud{display:none;}
+  #term{min-height:64px;padding:8px 16px;}
+  #t-hist{display:none;}
+  #topnav{padding:0 14px;}
+  .nav-brand{font-size:11px;}
+  .sec{padding:96px 0 120px;}
 }
-@media (max-width: 640px) {
-  .nav { padding: 16px 5vw; }
-  .nav nav { gap: 14px; overflow-x: auto; }
-  .nav nav a, .nav nav button { font-size: 9px; letter-spacing: 0.12em; }
-  .proj-grid { grid-template-columns: 1fr; }
-  .skill-grid { grid-template-columns: 1fr; }
-  #hud-latency, #hud-tokens { display: none; }
-  .contact-row { flex-wrap: wrap; }
+@media (max-width:560px){
+  .pj-grid{grid-template-columns:1fr;}
+  .sk-grid{grid-template-columns:1fr;}
+  body{font-size:14px;}
+}
+@media (prefers-reduced-motion:reduce){
+  .scrollhint .arr,.t-cursor{animation:none;}
+  *{transition:none !important;}
 }
 </style>
-
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
-  }
-}
-</script>
-<noscript><style>#preloader { display: none; } #gl { display: none; }</style></noscript>
+<noscript>
+<style>#preloader,#glcanvas,#cursor{display:none !important;}</style>
+</noscript>
 </head>
-
 <body>
+<a class="skip" href="#about">skip to content</a>
 
-<div id="preloader" aria-hidden="true"><pre id="pre-text">initializing model…
-loading weights [----------]   0%</pre></div>
-
-<canvas id="gl" aria-hidden="true"></canvas>
-<svg id="tethers" aria-hidden="true"></svg>
-
+<canvas id="glcanvas" aria-hidden="true"></canvas>
 <div id="cursor" aria-hidden="true"></div>
-<div id="ring" aria-hidden="true"></div>
 
-<header class="nav" id="nav">
-  <a class="brand" href="#hero" data-fly="0">SKS</a>
-  <nav aria-label="Sections">
-    <a href="#about" data-fly="1">ABOUT</a>
-    <a href="#experience" data-fly="2">EXPERIENCE</a>
-    <a href="#skills" data-fly="3">SKILLS</a>
-    <a href="#projects" data-fly="4">PROJECTS</a>
-    <a href="https://medium.com/@sulavstha007" target="_blank" rel="noopener">BLOG</a>
-    <a href="#contact" data-fly="5">CONTACT</a>
-    <button id="snd" aria-pressed="false" aria-label="Toggle ambient sound">SND OFF</button>
-  </nav>
-</header>
+<!-- boot preloader -->
+<div id="preloader" role="status" aria-label="loading">
+  <div class="boot">
+    <div class="bt">SKS/OS v4.2.0 — PHOSPHOR BUILD // TERMINAL IN SPACE</div>
+    <div id="boot-lines" aria-hidden="true"></div>
+    <div id="boot-bar"><div id="boot-bar-fill"></div></div>
+    <div style="margin-top:8px;">progress: <span id="boot-pct">0%</span></div>
+  </div>
+</div>
 
-<div class="hud" id="hud-layer" aria-hidden="true">LAYER 01 / 06 — INPUT</div>
-<div class="hud" id="hud-latency" aria-hidden="true">p50 12.0ms</div>
-<div class="hud" id="hud-tokens" aria-hidden="true">000000 tokens processed</div>
+<!-- nav -->
+<nav id="topnav" aria-label="primary">
+  <a class="nav-brand" href="#hero" data-sec="0">sks@portfolio<span class="tilde">:~</span></a>
+  <ul class="nav-links">
+    <li><a href="#about" data-sec="1"><span class="dollar">$ </span>cd ~/about</a></li>
+    <li><a href="#experience" data-sec="2"><span class="dollar">$ </span>cd ~/experience</a></li>
+    <li><a href="#skills" data-sec="3"><span class="dollar">$ </span>cd ~/skills</a></li>
+    <li><a href="#projects" data-sec="4"><span class="dollar">$ </span>ls projects/</a></li>
+    <li><a href="#blog" data-sec="5"><span class="dollar">$ </span>cat ~/blog.md</a></li>
+    <li><a href="#contact" data-sec="6"><span class="dollar">$ </span>cat contact.txt</a></li>
+  </ul>
+</nav>
 
-<main>
+<div id="sec-ind" aria-hidden="true"><b>[01/07]</b> ~/</div>
 
-  <!-- STATION 0 — input layer -->
-  <section id="hero" data-station="0" aria-label="Introduction">
+<main id="main">
+
+  <!-- HERO -->
+  <header class="sec" id="hero">
     <div class="wrap">
-      <p class="eyebrow" data-rv-hero>AI SYSTEMS ENGINEER</p>
-      <h1 class="mask" data-rv-hero>Sulav Kumar Shrestha</h1>
-      <p class="sub" data-rv-hero>Building intelligent systems at the intersection of LLMs, inference optimization &amp; cloud infrastructure.</p>
-      <div class="btn-row" data-rv-hero>
-        <a class="btn" href="#projects" data-fly="4">VIEW WORK</a>
-        <a class="btn solid" href="#contact" data-fly="5">GET IN TOUCH</a>
-      </div>
+      <p class="hero-boot hv">sks@portfolio:~$ whoami <span class="ok">// boot complete — all systems nominal</span></p>
+      <h1 class="hv">Sulav<br>Kumar<br>Shrestha</h1>
+      <p class="role hv">[ AI SYSTEMS ENGINEER ]</p>
+      <p class="tagline hv">Building intelligent systems at the intersection of <em>LLMs</em>, <em>inference optimization</em> &amp; <em>cloud infrastructure</em>.</p>
+      <p class="scrollhint hv"><span class="arr">▼</span> scroll to descend — or cd via nav</p>
     </div>
-    <p class="scroll-hint" data-rv-hero>scroll to run inference ↓</p>
-  </section>
+  </header>
 
-  <!-- STATION 1 — embedding space -->
-  <section id="about" data-station="1" aria-label="About">
+  <!-- ABOUT -->
+  <section class="sec" id="about" aria-labelledby="about-h">
     <div class="wrap">
+      <p class="cmdline rv"><span class="pr">sks@portfolio:~$</span> cd ~/about &amp;&amp; cat README.md</p>
+      <h2 id="about-h" class="rv"><span class="hash">#</span> About</h2>
       <div class="about-grid">
-        <div class="about-copy">
-          <p class="eyebrow" data-rv>LAYER 02 — EMBEDDING SPACE</p>
-          <h2 class="sec-head mask" data-rv>About</h2>
-          <p data-rv>I work on building AI-driven systems for real-world workflows in a compliance-focused environment. My work involves developing data validation pipelines, document processing systems, and internal automation tools powered by machine learning.</p>
-          <p data-rv>Over time, I've become more interested in what happens beyond model usage — how systems actually behave under load. Recently, I've been focusing on ML systems and LLM inference, working with Go to build backend services and gateways that handle request flow, concurrency, timeouts, and system limits.</p>
-          <ul class="interests" data-rv>
-            <li data-cluster="0">LLM serving and inference systems</li>
-            <li data-cluster="1">Backend systems under real-world constraints</li>
-            <li data-cluster="2">Batching, scheduling, and request control</li>
-            <li data-cluster="3">Building reliable and cost-aware AI infrastructure</li>
-          </ul>
+        <div class="bio panel-box rv">
+          <p><span class="cm"># README.md</span></p>
+          <p>I work on building AI-driven systems for real-world workflows in a compliance-focused environment. My work involves developing data validation pipelines, document processing systems, and internal automation tools powered by machine learning.</p>
+          <p>Over time, I've become more interested in what happens beyond model usage — how systems actually behave under load. Recently, I've been focusing on ML systems and LLM inference, working with Go to build backend services and gateways that handle request flow, concurrency, timeouts, and system limits.</p>
         </div>
-        <aside>
-          <div class="panel" data-rv>
-            <h3>CURRENTLY</h3>
+        <div class="side-stack">
+          <div class="mini panel-box rv">
+            <h3>INTERESTS/</h3>
+            <ul>
+              <li>LLM serving and inference systems</li>
+              <li>Backend systems under real-world constraints</li>
+              <li>Batching, scheduling, and request control</li>
+              <li>Reliable, cost-aware AI infrastructure</li>
+            </ul>
+          </div>
+          <div class="mini panel-box rv">
+            <h3>CURRENTLY/</h3>
             <ul>
               <li>Shipping LLM workflows on Azure</li>
               <li>Optimizing inference for edge and cloud</li>
               <li>Designing scalable microservice AI systems</li>
             </ul>
           </div>
-          <div class="chips" data-rv>
-            <a class="chip" href="https://github.com/majipa007" target="_blank" rel="noopener">GITHUB<span>↗</span></a>
-            <a class="chip" href="https://medium.com/@sulavstha007" target="_blank" rel="noopener">MEDIUM<span>↗</span></a>
-            <a class="chip" href="https://linkedin.com/in/sulav-shrestha-16b1091bb" target="_blank" rel="noopener">LINKEDIN<span>↗</span></a>
-            <a class="chip" href="https://kaggle.com/sulavshrestha007" target="_blank" rel="noopener">KAGGLE<span>↗</span></a>
-            <a class="chip" href="https://leetcode.com" target="_blank" rel="noopener">LEETCODE<span>↗</span></a>
-            <a class="chip" href="https://hackerrank.com" target="_blank" rel="noopener">HACKERRANK<span>↗</span></a>
-          </div>
-        </aside>
+        </div>
+      </div>
+      <div class="links-row rv">
+        <a href="https://github.com/majipa007" target="_blank" rel="noopener"><b>GITHUB</b> github.com/majipa007</a>
+        <a href="https://medium.com/@sulavstha007" target="_blank" rel="noopener"><b>MEDIUM</b> medium.com/@sulavstha007</a>
+        <a href="https://linkedin.com/in/sulav-shrestha-16b1091bb" target="_blank" rel="noopener"><b>LINKEDIN</b> sulav-shrestha-16b1091bb</a>
+        <a href="https://kaggle.com/sulavshrestha007" target="_blank" rel="noopener"><b>KAGGLE</b> kaggle.com/sulavshrestha007</a>
       </div>
     </div>
   </section>
 
-  <!-- STATION 2 — activated neurons -->
-  <section id="experience" data-station="2" aria-label="Experience">
+  <!-- EXPERIENCE -->
+  <section class="sec" id="experience" aria-labelledby="xp-h">
     <div class="wrap">
-      <p class="eyebrow" data-rv>LAYER 03 — ACTIVATED NEURONS</p>
-      <h2 class="sec-head mask" data-rv>Experience</h2>
-      <div class="exp-cards">
-        <article class="exp-card" id="exp-0" data-rv>
-          <div class="exp-meta"><span>APR 2025 — PRESENT</span><span>ONSITE</span></div>
+      <p class="cmdline rv"><span class="pr">sks@portfolio:~/about$</span> ls -la ~/experience/</p>
+      <h2 id="xp-h" class="rv"><span class="hash">#</span> Experience</h2>
+      <div class="xp-grid">
+        <article class="xp panel-box rv">
+          <p class="perm">drwxr-xr-x&nbsp;&nbsp;2&nbsp;sks&nbsp;staff&nbsp;&nbsp;incorp/</p>
           <h3>InCorp</h3>
-          <p class="exp-role">AI &amp; DATA ENGINEER INTERN</p>
+          <p class="meta">AI &amp; DATA ENGINEER INTERN <span class="sep">·</span> APR 2025 — PRESENT <span class="sep">·</span> ONSITE</p>
           <ul>
-            <li>Built intelligent PDF-to-Excel extraction pipelines using Azure Document Intelligence + Azure OpenAI. Cut processing time from 1–2 hours to under 5 minutes.</li>
-            <li>Designed large-scale document compliance system across 6 microservices/AKS pods with Azure Service Bus, handling hundreds of thousands of documents with classification, verification, and validation.</li>
-            <li>Developed transaction risk workflows flagging duplicates, anomalies, and compliance violations with automated reporting.</li>
-            <li class="stack">FastAPI · CosmosDB · Redis · MS Graph API · SharePoint · Azure OpenAI · Azure Document Intelligence · AKS · HMAC-secured endpoints</li>
+            <li>Built PDF-to-Excel extraction pipelines with Azure Document Intelligence + Azure OpenAI — <b>1–2 hrs of manual work → under 5 min</b>.</li>
+            <li>Designed a document compliance system across <b>6 microservices / AKS pods</b> with Azure Service Bus, handling <b>hundreds of thousands of documents</b> — classification, verification, validation.</li>
+            <li>Built transaction risk workflows flagging duplicates, anomalies &amp; compliance violations.</li>
           </ul>
+          <div class="stack">
+            <span>FastAPI</span><span>CosmosDB</span><span>Redis</span><span>MS Graph API</span><span>SharePoint</span><span>Azure OpenAI</span><span>Azure Document Intelligence</span><span>AKS</span>
+          </div>
         </article>
-        <article class="exp-card" id="exp-1" data-rv>
-          <div class="exp-meta"><span>JUL 2024 — NOV 2024</span><span>GERMANY · REMOTE</span></div>
+        <article class="xp panel-box rv">
+          <p class="perm">drwxr-xr-x&nbsp;&nbsp;2&nbsp;sks&nbsp;staff&nbsp;&nbsp;sprhava/</p>
           <h3>Sprhava</h3>
-          <p class="exp-role">JR. DATA SCIENTIST</p>
+          <p class="meta">JR. DATA SCIENTIST <span class="sep">·</span> JUL 2024 — NOV 2024 <span class="sep">·</span> GERMANY, REMOTE</p>
           <ul>
-            <li>Enhanced YOLOv8 obstacle tracking system; reduced false positives.</li>
-            <li>Replaced DeepSORT with ByteTrack — boosted FPS by 30% in dynamic environments.</li>
-            <li>Optimized system for cloud deployment.</li>
-            <li class="stack">YOLOv8 · ByteTrack · Python · OpenCV · Git</li>
+            <li>Enhanced YOLOv8 obstacle tracking and reduced false positives.</li>
+            <li>Replaced DeepSORT with ByteTrack — <b>+30% FPS</b>.</li>
+            <li>Optimized the tracking pipeline for cloud deployment.</li>
           </ul>
+          <div class="stack">
+            <span>YOLOv8</span><span>ByteTrack</span><span>Python</span><span>OpenCV</span>
+          </div>
         </article>
       </div>
     </div>
   </section>
 
-  <!-- STATION 3 — attention heads -->
-  <section id="skills" data-station="3" aria-label="Skills">
+  <!-- SKILLS -->
+  <section class="sec" id="skills" aria-labelledby="sk-h">
     <div class="wrap">
-      <p class="eyebrow" data-rv>LAYER 04 — ATTENTION HEADS</p>
-      <h2 class="sec-head mask" data-rv>Skills</h2>
-      <div class="skill-grid">
-        <div class="skill-group" data-group="0" data-rv>
-          <h3><em>H0</em>LANGUAGES</h3>
+      <p class="cmdline rv"><span class="pr">sks@portfolio:~/experience$</span> tree ~/skills/</p>
+      <h2 id="sk-h" class="rv"><span class="hash">#</span> Skills</h2>
+      <div class="sk-grid">
+        <div class="skill-cat panel-box rv" data-cat="0">
+          <h3>LANGUAGES</h3>
+          <p class="path">~/skills/languages/</p>
           <ul><li>Python</li><li>Go</li><li>SQL</li></ul>
         </div>
-        <div class="skill-group" data-group="1" data-rv>
-          <h3><em>H1</em>AI/ML</h3>
+        <div class="skill-cat panel-box rv" data-cat="1">
+          <h3>AI / ML</h3>
+          <p class="path">~/skills/ai-ml/</p>
           <ul><li>YOLOv8</li><li>OpenCV</li><li>MediaPipe</li><li>ONNX Runtime</li><li>NumPy</li><li>Pandas</li></ul>
         </div>
-        <div class="skill-group" data-group="2" data-rv>
-          <h3><em>H2</em>LLM/NLP</h3>
+        <div class="skill-cat panel-box rv" data-cat="2">
+          <h3>LLM / NLP</h3>
+          <p class="path">~/skills/llm-nlp/</p>
           <ul><li>LangChain</li><li>Hugging Face Transformers</li><li>Azure OpenAI</li><li>Microsoft Foundry</li><li>vLLM</li><li>Ollama</li><li>Prompt Engineering</li></ul>
         </div>
-        <div class="skill-group" data-group="3" data-rv>
-          <h3><em>H3</em>INFRASTRUCTURE</h3>
-          <ul><li>Docker</li><li>FastAPI</li><li>PostgreSQL</li><li>CosmosDB</li><li>Redis</li><li>Azure Service Bus</li><li>Azure Deployment Services</li></ul>
+        <div class="skill-cat panel-box rv" data-cat="3">
+          <h3>INFRASTRUCTURE</h3>
+          <p class="path">~/skills/infrastructure/</p>
+          <ul><li>Docker</li><li>FastAPI</li><li>PostgreSQL</li><li>CosmosDB</li><li>Redis</li><li>Azure Service Bus</li><li>AKS</li></ul>
         </div>
       </div>
+      <p class="tree-sum rv"><b>4</b> directories, <b>24</b> files — 0 errors</p>
     </div>
   </section>
 
-  <!-- STATION 4 — output heads -->
-  <section id="projects" data-station="4" aria-label="Projects">
+  <!-- PROJECTS -->
+  <section class="sec" id="projects" aria-labelledby="pj-h">
     <div class="wrap">
-      <p class="eyebrow" data-rv>LAYER 05 — OUTPUT HEADS</p>
-      <h2 class="sec-head mask" data-rv>Projects</h2>
-      <div class="proj-grid">
-        <a class="proj-card" data-node="0" data-rv href="https://github.com/majipa007/Quantization-YOLOv8" target="_blank" rel="noopener">
+      <p class="cmdline rv"><span class="pr">sks@portfolio:~/skills$</span> ls projects/ | head -6</p>
+      <h2 id="pj-h" class="rv"><span class="hash">#</span> Projects</h2>
+      <div class="pj-grid">
+        <a class="pj panel-box rv" href="https://github.com/majipa007/Quantization-YOLOv8" target="_blank" rel="noopener">
+          <span class="idx">[01] -rw-r--r--</span>
           <h3>Quantization-YOLOv8</h3>
-          <p>A guide to quantizing YOLOv8 object detection models using ONNX.</p>
-          <div class="proj-meta"><span class="lang">Jupyter Notebook</span><span>★ 28</span><span>⑂ 12</span></div>
+          <p>A comprehensive guide to quantizing YOLOv8 models using ONNX — smaller, faster edge inference.</p>
+          <span class="foot"><span class="lang">Jupyter Notebook</span><span class="st">★ 28 &nbsp;⑂ 12</span><span class="arrow">→</span></span>
         </a>
-        <a class="proj-card" data-node="1" data-rv href="https://github.com/majipa007/fall_detection" target="_blank" rel="noopener">
+        <a class="pj panel-box rv" href="https://github.com/majipa007/fall_detection" target="_blank" rel="noopener">
+          <span class="idx">[02] -rw-r--r--</span>
           <h3>fall_detection</h3>
-          <p>Real-time human fall detection with pose estimation.</p>
-          <div class="proj-meta"><span class="lang">Python</span><span>★ 3</span></div>
+          <p>Real-time fall detection with pose estimation for safety-critical monitoring.</p>
+          <span class="foot"><span class="lang">Python</span><span class="st">★ 3</span><span class="arrow">→</span></span>
         </a>
-        <a class="proj-card" data-node="2" data-rv href="https://github.com/majipa007/RetailMetrics-Modern-Data-Stack" target="_blank" rel="noopener">
-          <h3>RetailMetrics</h3>
-          <p>Modern data stack for retail operations: OLTP→OLAP pipeline automation with Airflow and DBT, interactive Streamlit dashboards, Node.js backend with PostgreSQL.</p>
-          <div class="proj-meta"><span class="lang">Python</span><span>★ 1</span></div>
+        <a class="pj panel-box rv" href="https://github.com/majipa007/RetailMetrics-Modern-Data-Stack" target="_blank" rel="noopener">
+          <span class="idx">[03] -rw-r--r--</span>
+          <h3>RetailMetrics-Modern-Data-Stack</h3>
+          <p>OLTP→OLAP pipeline with Airflow &amp; DBT, plus Streamlit analytics dashboards.</p>
+          <span class="foot"><span class="lang">Python</span><span class="st">★ 1</span><span class="arrow">→</span></span>
         </a>
-        <a class="proj-card" data-node="3" data-rv href="https://github.com/majipa007/NaturalQuery-Executor-Using-Phi-3" target="_blank" rel="noopener">
-          <h3>NaturalQuery Executor</h3>
-          <p>Natural language to SQL execution using Phi-3.</p>
-          <div class="proj-meta"><span class="lang">Jupyter Notebook</span><span>★ 1</span><span>⑂ 1</span></div>
+        <a class="pj panel-box rv" href="https://github.com/majipa007/NaturalQuery-Executor-Using-Phi-3" target="_blank" rel="noopener">
+          <span class="idx">[04] -rw-r--r--</span>
+          <h3>NaturalQuery-Executor-Using-Phi-3</h3>
+          <p>Natural language → SQL query execution powered by Phi-3.</p>
+          <span class="foot"><span class="lang">Jupyter Notebook</span><span class="st">★ 1 &nbsp;⑂ 1</span><span class="arrow">→</span></span>
         </a>
-        <a class="proj-card" data-node="4" data-rv href="https://github.com/majipa007/mindscape" target="_blank" rel="noopener">
+        <a class="pj panel-box rv" href="https://github.com/majipa007/mindscape" target="_blank" rel="noopener">
+          <span class="idx">[05] -rw-r--r--</span>
           <h3>mindscape</h3>
-          <p>Mental health platform with an LLM-powered companion, guided meditation, and appointment scheduling.</p>
-          <div class="proj-meta"><span class="lang">Python</span><span>★ 1</span><span>⑂ 1</span></div>
+          <p>LLM-powered mental-health platform.</p>
+          <span class="foot"><span class="lang">Python</span><span class="st">★ 1 &nbsp;⑂ 1</span><span class="arrow">→</span></span>
         </a>
-        <a class="proj-card" data-node="5" data-rv href="https://github.com/majipa007/sift" target="_blank" rel="noopener">
+        <a class="pj panel-box rv" href="https://github.com/majipa007/sift" target="_blank" rel="noopener">
+          <span class="idx">[06] -rw-r--r--</span>
           <h3>sift</h3>
-          <p>No description provided.</p>
-          <div class="proj-meta"><span class="lang">TypeScript</span></div>
+          <p>TypeScript project — read the source in the repository.</p>
+          <span class="foot"><span class="lang">TypeScript</span><span class="st">./run</span><span class="arrow">→</span></span>
         </a>
       </div>
-      <a class="blog-link" data-rv href="https://medium.com/@sulavstha007" target="_blank" rel="noopener">BLOG →</a>
+      <p class="pj-more rv">// full listing: <a href="https://github.com/majipa007" target="_blank" rel="noopener">github.com/majipa007</a></p>
     </div>
   </section>
 
-  <!-- STATION 5 — output token -->
-  <section id="contact" data-station="5" aria-label="Contact">
+  <!-- BLOG -->
+  <section class="sec" id="blog" aria-labelledby="bl-h">
     <div class="wrap">
-      <p class="eyebrow" data-rv>LAYER 06 — OUTPUT TOKEN</p>
-      <h2 class="sec-head mask" data-rv>Let's build something.</h2>
-      <p class="sub" data-rv>Open to full-time roles, research collaborations, and interesting problems in AI systems.</p>
-      <div class="contact-rows">
-        <button class="contact-row" data-copy="sulavstha007@gmail.com" data-rv>
-          <span class="label">EMAIL</span>
-          <span class="value">sulavstha007@gmail.com</span>
-          <span class="hint">CLICK TO COPY</span>
-          <a class="ext" href="mailto:sulavstha007@gmail.com" aria-label="Send email" onclick="event.stopPropagation()">↗</a>
-        </button>
-        <button class="contact-row" data-copy="github.com/majipa007" data-rv>
-          <span class="label">GITHUB</span>
-          <span class="value">github.com/majipa007</span>
-          <span class="hint">CLICK TO COPY</span>
-          <a class="ext" href="https://github.com/majipa007" target="_blank" rel="noopener" aria-label="Open GitHub" onclick="event.stopPropagation()">↗</a>
-        </button>
-        <button class="contact-row" data-copy="linkedin.com/in/sulav-shrestha-16b1091bb" data-rv>
-          <span class="label">LINKEDIN</span>
-          <span class="value">sulav-shrestha-16b1091bb</span>
-          <span class="hint">CLICK TO COPY</span>
-          <a class="ext" href="https://linkedin.com/in/sulav-shrestha-16b1091bb" target="_blank" rel="noopener" aria-label="Open LinkedIn" onclick="event.stopPropagation()">↗</a>
-        </button>
-        <button class="contact-row" data-copy="+91 8921875723" data-rv>
-          <span class="label">PHONE</span>
-          <span class="value">+91 8921875723</span>
-          <span class="hint">CLICK TO COPY</span>
-          <a class="ext" href="tel:+918921875723" aria-label="Call phone" onclick="event.stopPropagation()">↗</a>
-        </button>
+      <p class="cmdline rv"><span class="pr">sks@portfolio:~/projects$</span> cat ~/blog.md</p>
+      <h2 id="bl-h" class="rv"><span class="hash">#</span> Blog</h2>
+      <div class="ct-rows panel-box rv" style="padding:0 26px;">
+        <a href="https://shorturl.at/eoPbo" target="_blank" rel="noopener"><span class="k">POST [01]</span><span class="v">A Guide to Quantize YOLOv8 Object Detection Models Using ONNX</span></a>
+        <a href="https://medium.com/@sulavstha007" target="_blank" rel="noopener" style="border-bottom:0;"><span class="k">MEDIUM</span><span class="v">More writing on Medium →</span></a>
       </div>
     </div>
   </section>
 
+  <!-- CONTACT -->
+  <section class="sec" id="contact" aria-labelledby="ct-h">
+    <div class="wrap">
+      <p class="cmdline rv"><span class="pr">sks@portfolio:~/blog$</span> cat contact.txt</p>
+      <h2 id="ct-h" class="rv"><span class="hash">#</span> Contact</h2>
+      <div class="ct-rows panel-box rv" style="padding:0 26px;">
+        <a href="mailto:sulavstha007@gmail.com"><span class="k">EMAIL</span><span class="v">sulavstha007@gmail.com</span></a>
+        <a href="https://github.com/majipa007" target="_blank" rel="noopener"><span class="k">GITHUB</span><span class="v">github.com/majipa007</span></a>
+        <a href="https://linkedin.com/in/sulav-shrestha-16b1091bb" target="_blank" rel="noopener"><span class="k">LINKEDIN</span><span class="v">sulav-shrestha-16b1091bb</span></a>
+        <a href="tel:+918921875723" style="border-bottom:0;"><span class="k">PHONE</span><span class="v">+91 8921875723</span></a>
+      </div>
+      <p class="exitline rv"><span class="pr">sks@portfolio:~$</span> exit 0 <span class="t-cursor" aria-hidden="true"></span></p>
+    </div>
+  </section>
 </main>
 
-<footer>© 2026 Sulav Kumar Shrestha — inference complete</footer>
+<footer>
+  <div class="wrap">
+    <span>© 2026 Sulav Kumar Shrestha</span>
+    <span>rendered in the void · single file · zero trackers</span>
+  </div>
+</footer>
 
-<div id="toast" role="status">COPIED</div>
+<!-- persistent terminal strip -->
+<div id="term" aria-hidden="true">
+  <div class="t-left">
+    <div id="t-hist"><span>$ whoami</span><br><span class="h-out">sulav_kumar_shrestha :: ai-systems-engineer</span></div>
+    <div class="t-line"><span class="t-prompt">sks@portfolio:<span id="t-path">~</span>$</span> <span id="t-cmd"></span><span class="t-cursor"></span></div>
+  </div>
+  <div id="hud">
+    <span>UPTIME <b id="hud-up">00:00:00</b></span>
+    <span>LOAD&nbsp;&nbsp; <b id="hud-load">0.42 0.38 0.35</b></span>
+    <span>MEM&nbsp;&nbsp;&nbsp; <b id="hud-mem">412M / 2048M</b></span>
+  </div>
+</div>
 
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
+<!-- ============ UI SCRIPT (classic — survives WebGL/module failure) ============ -->
+<script>
+(function(){
+  'use strict';
+  var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var finePointer = window.matchMedia('(pointer: fine)').matches;
 
-<script type="module">
-/* ============================================================
-   INSIDE THE MODEL
-   one continuous WebGL journey through a neural network.
-   ============================================================ */
-import * as THREE from 'three';
-import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
-
-document.documentElement.classList.add('js');
-
-/* ---------- environment ---------- */
-const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const finePointer  = matchMedia('(pointer: fine)').matches;
-const isSmall      = matchMedia('(max-width: 760px)').matches;
-let webgl = false;
-try {
-  const t = document.createElement('canvas');
-  webgl = !!(window.WebGLRenderingContext && (t.getContext('webgl2') || t.getContext('webgl')));
-} catch (e) { webgl = false; }
-if (!webgl) document.documentElement.classList.add('no-webgl');
-
-gsap.registerPlugin(ScrollTrigger);
-
-/* ---------- preloader ---------- */
-const preEl = document.getElementById('pre-text');
-const preloader = document.getElementById('preloader');
-let preDone = false;
-function setProgress(p) {
-  if (preDone) return;
-  p = Math.min(1, Math.max(0, p));
-  const slots = 10, filled = Math.round(p * slots);
-  preEl.textContent =
-    'initializing model…\nloading weights [' +
-    '#'.repeat(filled) + '-'.repeat(slots - filled) +
-    '] ' + String(Math.round(p * 100)).padStart(3, ' ') + '%';
-}
-function finishPreloader(then) {
-  if (preDone) return;
-  preDone = true;
-  preEl.innerHTML = 'initializing model…\nloading weights [##########] 100%\n<span class="amber">inference ready</span>';
-  gsap.to(preloader, {
-    autoAlpha: 0, duration: 0.7, delay: 0.45, ease: 'power2.inOut',
-    onComplete: () => { preloader.remove(); if (then) then(); }
-  });
-}
-// hard fallback: never trap the user on the loader
-setTimeout(() => finishPreloader(startExperience), 9000);
-
-/* ---------- smooth scroll ---------- */
-let lenis = null;
-if (!reduceMotion && window.Lenis) {
-  lenis = new Lenis({ autoRaf: false, lerp: 0.09, wheelMultiplier: 1 });
-  lenis.on('scroll', ScrollTrigger.update);
-  gsap.ticker.add((t) => lenis.raf(t * 1000));
-  gsap.ticker.lagSmoothing(0);
-}
-const getScroll = () => (lenis ? lenis.scroll : (window.scrollY || 0));
-const getVelocity = () => (lenis ? lenis.velocity : 0);
-
-/* ---------- journey config ---------- */
-const STATIONS = [
-  { label: 'INPUT',      center: new THREE.Vector3(  0,   0,    0) },
-  { label: 'ABOUT',      center: new THREE.Vector3( -6,   1,  -90) },
-  { label: 'EXPERIENCE', center: new THREE.Vector3(  7,  -2, -180) },
-  { label: 'SKILLS',     center: new THREE.Vector3( -6,   2, -270) },
-  { label: 'PROJECTS',   center: new THREE.Vector3(  6,   0, -360) },
-  { label: 'CONTACT',    center: new THREE.Vector3(  0,   0, -450) },
-];
-const C = STATIONS.map(s => s.center);
-const sections = [...document.querySelectorAll('main section')];
-let sectionCenters = [];
-function computeCenters() {
-  sectionCenters = sections.map(s => s.offsetTop + s.offsetHeight / 2);
-}
-
-/* raw scroll → continuous station state 0..5 */
-function rawState() {
-  const sc = getScroll() + innerHeight / 2;
-  if (sc <= sectionCenters[0]) return 0;
-  const last = sectionCenters.length - 1;
-  if (sc >= sectionCenters[last]) return last;
-  let i = 0;
-  while (i < last && sc > sectionCenters[i + 1]) i++;
-  return i + (sc - sectionCenters[i]) / (sectionCenters[i + 1] - sectionCenters[i]);
-}
-
-/* ---------- shared UI state ---------- */
-let smState = 0;          // smoothed state
-let easedState = 0;       // dwell-eased state (drives shader + camera)
-const mouse = { x: 0, y: 0 };
-
-/* ============================================================
-   WEBGL SCENE
-   ============================================================ */
-let renderer, scene, camera, composer, finalPass, bloomPass;
-let particles, uniforms, clusterLines, clusterLinesMat;
-let camPath;
-let clusterCenters1 = [];   // interest-hover anchors (state 1)
-const constCenters3 = [];   // constellations (state 3)
-let neuronA, neuronB;       // activated neurons (state 2)
-const projNodes = [];       // project tether anchors (state 4)
-const N = isSmall ? 40000 : 200000;
-const DPR = Math.min(devicePixelRatio || 1, 1.75);
-
-function mulberry32(a) {
-  return function () {
-    a |= 0; a = (a + 0x6D2B79F5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  /* ---------- tiny event bus / shared state ---------- */
+  var listeners = {};
+  var APP = window.APP = {
+    reduced: reduced,
+    lenis: null,
+    activeIndex: 0,
+    booted: false,
+    on: function(ev, fn){ (listeners[ev] = listeners[ev] || []).push(fn); },
+    emit: function(ev){ var a = [].slice.call(arguments,1); (listeners[ev]||[]).forEach(function(f){ f.apply(null,a); }); },
+    getScroll: function(){ return APP.lenis ? APP.lenis.scroll : (window.scrollY || 0); },
+    sections: []
   };
-}
 
-/* --- sample the name into 2D points via offscreen canvas --- */
-function sampleName() {
-  const W = 1500, H = 660;
-  const cv = document.createElement('canvas');
-  cv.width = W; cv.height = H;
-  const ctx = cv.getContext('2d', { willReadFrequently: true });
-  ctx.fillStyle = '#fff';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.font = '400 212px "Instrument Serif", Georgia, serif';
-  ctx.fillText('SULAV', W / 2, 122);
-  ctx.fillText('KUMAR', W / 2, 330);
-  ctx.fillText('SHRESTHA', W / 2, 538);
-  const data = ctx.getImageData(0, 0, W, H).data;
-  const pts = [];
-  for (let y = 0; y < H; y += 3) {
-    for (let x = 0; x < W; x += 3) {
-      if (data[(y * W + x) * 4 + 3] > 120) {
-        pts.push([x / W - 0.5, -(y / H - 0.5), H / W]);
-      }
-    }
-  }
-  return pts;
-}
+  var secEls = ['hero','about','experience','skills','projects','blog','contact'].map(function(id){ return document.getElementById(id); });
+  APP.sections = secEls;
 
-/* --- build all six morph-target attribute buffers --- */
-function buildTargets(namePts) {
-  const rnd = mulberry32(1337);
-  const gauss = () => (rnd() + rnd() + rnd() + rnd() - 2) * 0.85;
-  const T = Array.from({ length: 6 }, () => new Float32Array(N * 3));
-  const AR = new Float32Array(N * 4);
-
-  const put = (buf, k, x, y, z) => { buf[k * 3] = x; buf[k * 3 + 1] = y; buf[k * 3 + 2] = z; };
-
-  /* T0 — hero typography + ambient shell (sized to the viewport frustum) */
-  const visW = 46.6 * (innerWidth / Math.max(innerHeight, 1)); // frustum width at the text plane
-  const TEXT_W = Math.min(50, visW * 0.92), textShare = 0.55;
-  const yScale = TEXT_W * (namePts.length ? namePts[0][2] : 0.44);
-  for (let k = 0; k < N; k++) {
-    if (namePts.length && k < N * textShare) {
-      const p = namePts[k % namePts.length];
-      put(T[0], k,
-        C[0].x + p[0] * TEXT_W + (rnd() - 0.5) * 0.3,
-        C[0].y + 3 + p[1] * yScale + (rnd() - 0.5) * 0.3,
-        C[0].z - 8 + (rnd() - 0.5) * 2.4);
-    } else {
-      const r = 30 + rnd() * 60, th = rnd() * Math.PI * 2, ph = Math.acos(2 * rnd() - 1);
-      put(T[0], k,
-        C[0].x + r * Math.sin(ph) * Math.cos(th),
-        C[0].y + r * Math.sin(ph) * Math.sin(th) * 0.6,
-        C[0].z - 20 - rnd() * 60);
-    }
-  }
-
-  /* T1 — embedding cloud: 8 loose clusters */
-  const cc1 = [];
-  for (let j = 0; j < 8; j++) {
-    cc1.push(new THREE.Vector3(
-      C[1].x + (rnd() - 0.5) * 32,
-      C[1].y + (rnd() - 0.5) * 18,
-      C[1].z + (rnd() - 0.5) * 14));
-  }
-  clusterCenters1 = cc1.slice(0, 4);
-  for (let k = 0; k < N; k++) {
-    const c = cc1[k % 8];
-    if (rnd() < 0.12) {
-      put(T[1], k, C[1].x + (rnd() - 0.5) * 52, C[1].y + (rnd() - 0.5) * 30, C[1].z + (rnd() - 0.5) * 26);
-    } else {
-      put(T[1], k, c.x + gauss() * 3.4, c.y + gauss() * 3.0, c.z + gauss() * 3.0);
-    }
-  }
-
-  /* T2 — neuron layer: grid of somas + synapse dust */
-  const neurons = [];
-  for (let r = 0; r < 3; r++) for (let col = 0; col < 5; col++) {
-    neurons.push(new THREE.Vector3(
-      C[2].x + (col - 2) * 6.5 + (rnd() - 0.5) * 1.8,
-      C[2].y + (r - 1) * 5.6 + (rnd() - 0.5) * 1.4,
-      C[2].z + (rnd() - 0.5) * 6));
-  }
-  neuronA = neurons[6].set(C[2].x - 4.6, C[2].y + 2.9, C[2].z + 1.6).clone();
-  neuronB = neurons[8].set(C[2].x + 5.2, C[2].y - 2.4, C[2].z + 0.6).clone();
-  for (let k = 0; k < N; k++) {
-    if (rnd() < 0.55) {
-      const n = neurons[k % neurons.length];
-      put(T[2], k, n.x + gauss() * 1.45, n.y + gauss() * 1.45, n.z + gauss() * 1.45);
-    } else {
-      const a = neurons[Math.floor(rnd() * neurons.length)];
-      const b = neurons[Math.floor(rnd() * neurons.length)];
-      const t = rnd();
-      put(T[2], k,
-        a.x + (b.x - a.x) * t + (rnd() - 0.5) * 0.5,
-        a.y + (b.y - a.y) * t + (rnd() - 0.5) * 0.5,
-        a.z + (b.z - a.z) * t + (rnd() - 0.5) * 0.5);
-    }
-  }
-
-  /* T3 — four attention-head constellations (orbital rings) */
-  const off3 = [[-9.5, 4.8, -1], [9.5, 5.2, -2], [-9, -5, 1], [9.5, -4.6, 0]];
-  const tmpA = new THREE.Vector3(), tmpU = new THREE.Vector3(), tmpV = new THREE.Vector3();
-  for (let j = 0; j < 4; j++) constCenters3.push(C[3].clone().add(new THREE.Vector3(...off3[j])));
-  for (let k = 0; k < N; k++) {
-    const id = k % 4;
-    const c = constCenters3[id];
-    if (rnd() < 0.18) {
-      put(T[3], k, c.x + gauss() * 1.2, c.y + gauss() * 1.2, c.z + gauss() * 1.2);
-    } else {
-      tmpA.set(rnd() - 0.5, rnd() - 0.5, rnd() - 0.5).normalize();
-      tmpU.set(1, 0, 0);
-      if (Math.abs(tmpA.x) > 0.9) tmpU.set(0, 1, 0);
-      tmpU.crossVectors(tmpA, tmpU).normalize();
-      tmpV.crossVectors(tmpA, tmpU).normalize();
-      const rr = 2.6 + rnd() * 4.6, th = rnd() * Math.PI * 2, ecc = 0.55 + 0.45 * rnd();
-      put(T[3], k,
-        c.x + (tmpU.x * Math.cos(th) + tmpV.x * Math.sin(th) * ecc) * rr,
-        c.y + (tmpU.y * Math.cos(th) + tmpV.y * Math.sin(th) * ecc) * rr,
-        c.z + (tmpU.z * Math.cos(th) + tmpV.z * Math.sin(th) * ecc) * rr);
-    }
-    AR[k * 4 + 3] = id;
-  }
-
-  /* T4 — output heads: 6 nodes on an arc + dot-matrix wall */
-  for (let i = 0; i < 6; i++) {
-    const ang = (-1 + (2 * i) / 5) * 0.92;
-    projNodes.push(new THREE.Vector3(
-      C[4].x + Math.sin(ang) * 20,
-      C[4].y + (i % 2 ? 3.0 : -2.2),
-      C[4].z + (Math.cos(ang) - 1) * 11));
-  }
-  for (let k = 0; k < N; k++) {
-    if (rnd() < 0.4) {
-      const nd = projNodes[k % 6];
-      put(T[4], k, nd.x + gauss() * 1.1, nd.y + gauss() * 1.1, nd.z + gauss() * 1.1);
-    } else {
-      let x = (rnd() - 0.5) * 48, y = (rnd() - 0.5) * 24;
-      x = Math.round(x / 1.7) * 1.7 + (rnd() - 0.5) * 0.18;
-      y = Math.round(y / 1.5) * 1.5 + (rnd() - 0.5) * 0.18;
-      put(T[4], k, C[4].x + x, C[4].y + y, C[4].z - 8 - rnd() * 7);
-    }
-  }
-
-  /* T5 — output token: soft burst shell around the CTA */
-  for (let k = 0; k < N; k++) {
-    const th = rnd() * Math.PI * 2, ph = Math.acos(2 * rnd() - 1);
-    const r = rnd() < 0.15 ? rnd() * 2.6 : 16 + rnd() * 14;
-    put(T[5], k,
-      C[5].x + r * Math.sin(ph) * Math.cos(th),
-      C[5].y + r * Math.sin(ph) * Math.sin(th) * 0.75,
-      C[5].z - 6 + r * Math.cos(ph) * 0.8);
-  }
-
-  for (let k = 0; k < N; k++) {
-    AR[k * 4]     = rnd();
-    AR[k * 4 + 1] = rnd();
-    AR[k * 4 + 2] = rnd();
-  }
-  return { T, AR };
-}
-
-/* --- shaders --- */
-const VERT = /* glsl */`
-uniform float uState;
-uniform float uAssemble;
-uniform float uTime;
-uniform float uTurbAmp;
-uniform float uPixelRatio;
-uniform float uSize;
-uniform vec3  uCursor;
-uniform float uCursorForce;
-uniform vec3  uCamPos;
-uniform vec3  uHotCenter;
-uniform float uHotOn;
-uniform vec3  uNeuronA;
-uniform vec3  uNeuronB;
-uniform float uFocus3;
-uniform float uFocusAmt;
-uniform vec3  uConstCenters[4];
-uniform vec3  uConverge;
-
-attribute vec3 aT1;
-attribute vec3 aT2;
-attribute vec3 aT3;
-attribute vec3 aT4;
-attribute vec3 aT5;
-attribute vec4 aRand;
-
-varying float vAct;
-varying float vAlpha;
-
-vec3 turb(vec3 p, float t) {
-  return vec3(
-    sin(p.y * 1.7 + t * 1.1) + sin(p.z * 2.3 + t * 0.7),
-    sin(p.z * 1.9 + t * 1.3) + sin(p.x * 2.1 + t * 0.9),
-    sin(p.x * 1.5 + t * 1.7) + sin(p.y * 2.7 + t * 0.5)
-  ) * 0.5;
-}
-
-void main() {
-  float s   = clamp(uState, 0.0, 5.0);
-  float seg = min(floor(s), 4.0);
-  float f   = s - seg;
-
-  vec3 A = position; vec3 B = aT1;
-  if (seg > 0.5) { A = aT1; B = aT2; }
-  if (seg > 1.5) { A = aT2; B = aT3; }
-  if (seg > 2.5) { A = aT3; B = aT4; }
-  if (seg > 3.5) { A = aT4; B = aT5; }
-
-  float ff = f * f * (3.0 - 2.0 * f);
-  float d0 = aRand.y * 0.3;
-  float fs = clamp((ff - d0) / (1.0 - d0), 0.0, 1.0);
-  fs = fs * fs * (3.0 - 2.0 * fs);
-  vec3 p = mix(A, B, fs);
-
-  float trans = sin(3.14159265 * fs);
-
-  /* final transition: all particles pinch through a single point */
-  if (seg > 3.5) p = mix(p, uConverge, trans * 0.9);
-
-  /* curl-ish turbulence while morphing, gentle breath at rest */
-  p += turb(p * 0.35 + aRand.xyz * 6.2831, uTime) * trans * 4.0 * uTurbAmp;
-  p += turb(p * 0.06, uTime * 0.25) * 0.45 * (0.4 + 0.6 * uTurbAmp);
-
-  /* attention-head focus: tighten hovered constellation */
-  float w3 = 1.0 - smoothstep(0.45, 0.9, abs(s - 3.0));
-  float m3 = 0.0;
-  if (uFocus3 > -0.5) {
-    m3 = 1.0 - step(0.5, abs(aRand.w - uFocus3));
-    vec3 cc = uConstCenters[int(aRand.w + 0.5)];
-    p = mix(p, cc + (p - cc) * 0.55, m3 * uFocusAmt * w3);
-  }
-
-  /* assemble from chaos after preload */
-  vec3 dir = normalize(vec3(
-    fract(sin(aRand.x * 127.1) * 43758.55) - 0.5,
-    fract(sin(aRand.y * 311.7) * 43758.55) - 0.5,
-    fract(sin(aRand.z * 74.7)  * 43758.55) - 0.5) + vec3(0.001));
-  vec3 chaos = dir * (50.0 + 130.0 * aRand.x);
-  float aa = clamp((uAssemble - aRand.y * 0.35) / 0.65, 0.0, 1.0);
-  aa = aa * aa * (3.0 - 2.0 * aa);
-  p = mix(chaos, p, aa);
-
-  /* cursor repulsion */
-  vec3 dc = p - uCursor;
-  float dl = max(length(dc), 0.001);
-  p += (dc / dl) * exp(-dl * dl * 0.03) * 5.0 * uCursorForce;
-
-  /* particles part around the lens */
-  vec3 dk = p - uCamPos;
-  float dkl = max(length(dk), 0.001);
-  p += (dk / dkl) * exp(-dkl * dkl * 0.02) * 6.0;
-
-  /* activation — amber is earned, not sprayed */
-  float act = 0.0;
-  float w2 = 1.0 - smoothstep(0.4, 0.85, abs(s - 2.0));
-  float da = length(p - uNeuronA);
-  float db = length(p - uNeuronB);
-  act = max(act, w2 * exp(-da * da * 0.14) * (0.7 + 0.3 * sin(uTime * 2.2)));
-  act = max(act, w2 * exp(-db * db * 0.14) * (0.7 + 0.3 * sin(uTime * 2.7 + 1.7)));
-  act = max(act, uHotOn * exp(-pow(length(p - uHotCenter) * 0.22, 2.0)));
-  act = max(act, m3 * uFocusAmt * w3 * 0.85);
-  if (seg > 3.5) act = max(act, trans * 0.7);
-  vAct = act;
-
-  vec4 mv = modelViewMatrix * vec4(p, 1.0);
-  gl_Position = projectionMatrix * mv;
-
-  float dist = max(-mv.z, 0.1);
-  float size = uSize * (0.7 + 0.9 * aRand.x) * (1.0 + act * 0.6);
-  gl_PointSize = min(size * uPixelRatio * (130.0 / dist), 30.0 * uPixelRatio);
-
-  float fogA  = 1.0 - smoothstep(70.0, 150.0, dist);
-  float nearA = smoothstep(1.5, 7.0, dist);
-  vAlpha = fogA * nearA;
-  vAlpha *= mix(1.0, m3 > 0.5 ? 1.0 : 0.45, uFocusAmt * w3);
-}
-`;
-
-const FRAG = /* glsl */`
-precision highp float;
-uniform vec3 uColBase;
-uniform vec3 uColAct;
-varying float vAct;
-varying float vAlpha;
-void main() {
-  vec2 uv = gl_PointCoord - 0.5;
-  float d = length(uv);
-  float disk = smoothstep(0.5, 0.06, d);
-  float alpha = disk * vAlpha * (0.11 + 0.26 * clamp(vAct, 0.0, 1.0));
-  if (alpha < 0.004) discard;
-  vec3 col = mix(uColBase, uColAct, clamp(vAct, 0.0, 1.0));
-  gl_FragColor = vec4(col * (0.55 + vAct * 0.9), alpha);
-}
-`;
-
-const FinalShader = {
-  uniforms: {
-    tDiffuse:  { value: null },
-    uTime:     { value: 0 },
-    uAberr:    { value: 0.004 },
-    uGrain:    { value: 0.03 },
-    uVignette: { value: 0.2 },
-  },
-  vertexShader: /* glsl */`
-    varying vec2 vUv;
-    void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }
-  `,
-  fragmentShader: /* glsl */`
-    uniform sampler2D tDiffuse;
-    uniform float uTime, uAberr, uGrain, uVignette;
-    varying vec2 vUv;
-    float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
-    void main() {
-      vec2 c = vUv - 0.5;
-      float r2 = dot(c, c);
-      vec2 off = c * r2 * uAberr * 3.0;
-      vec4 base = texture2D(tDiffuse, vUv);
-      float cr = texture2D(tDiffuse, vUv + off).r;
-      float cb = texture2D(tDiffuse, vUv - off).b;
-      vec3 col = vec3(cr, base.g, cb);
-      col += (hash(vUv * vec2(1517.0, 997.0) + fract(uTime) * 917.0) - 0.5) * uGrain;
-      col *= 1.0 - r2 * uVignette * 2.2;
-      gl_FragColor = vec4(col, base.a);
-    }
-  `,
-};
-
-/* --- scene assembly --- */
-function initScene(namePts) {
-  renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('gl'), antialias: false, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(DPR);
-  renderer.setSize(innerWidth, innerHeight);
-  renderer.setClearColor(0x050505, 1);
-
-  scene = new THREE.Scene();
-  scene.fog = new THREE.Fog(0x050505, 55, 150);
-
-  camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 400);
-  camera.position.set(0, 0, 42);
-
-  /* camera flight path — rest point per station + swinging midpoints */
-  const rest = [
-    new THREE.Vector3(0, 0, 42), new THREE.Vector3(0, 1, 34), new THREE.Vector3(0, 1, 34),
-    new THREE.Vector3(0, 1, 34), new THREE.Vector3(0, 1, 34), new THREE.Vector3(0, 2, 36),
+  /* ---------- boot preloader ---------- */
+  var bootSteps = [
+    ['dom',    'mounting /dev/void ...............'],
+    ['fonts',  'loading typeface: jetbrains_mono .'],
+    ['ctx',    'initializing webgl2 context ......'],
+    ['slabs',  'carving concrete slabs (17) ......'],
+    ['shader', 'compiling ascii_pass.frag ........'],
+    ['frame',  'first photons emitted ............']
   ];
-  const swing = [[7, -2], [-8, 3], [8, -3], [-7, 2], [5, 3]];
-  const pathPts = [];
-  for (let i = 0; i < 6; i++) {
-    const cam = C[i].clone().add(rest[i]);
-    pathPts.push(cam);
-    if (i < 5) {
-      const next = C[i + 1].clone().add(rest[i + 1]);
-      pathPts.push(cam.clone().add(next).multiplyScalar(0.5)
-        .add(new THREE.Vector3(swing[i][0], swing[i][1], 0)));
+  var bootDone = {}, bootCount = 0, bootFinished = false;
+  var linesEl = document.getElementById('boot-lines');
+  var fillEl = document.getElementById('boot-bar-fill');
+  var pctEl = document.getElementById('boot-pct');
+  var pre = document.getElementById('preloader');
+
+  function bootMark(name){
+    if (bootFinished || bootDone[name]) return;
+    bootDone[name] = true; bootCount++;
+    var step = bootSteps.filter(function(s){ return s[0] === name; })[0];
+    if (step && linesEl){
+      var d = document.createElement('div');
+      d.innerHTML = '&gt; ' + step[1] + ' <span class="ok">[ OK ]</span>';
+      linesEl.appendChild(d);
     }
+    var p = Math.round(bootCount / bootSteps.length * 100);
+    if (fillEl) fillEl.style.width = p + '%';
+    if (pctEl) pctEl.textContent = p + '%';
+    if (bootCount >= bootSteps.length) setTimeout(bootFinish, reduced ? 60 : 420);
   }
-  camPath = new THREE.CatmullRomCurve3(pathPts, false, 'catmullrom', 0.5);
-
-  /* particle morph system */
-  const { T, AR } = buildTargets(namePts);
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.BufferAttribute(T[0], 3));
-  geo.setAttribute('aT1', new THREE.BufferAttribute(T[1], 3));
-  geo.setAttribute('aT2', new THREE.BufferAttribute(T[2], 3));
-  geo.setAttribute('aT3', new THREE.BufferAttribute(T[3], 3));
-  geo.setAttribute('aT4', new THREE.BufferAttribute(T[4], 3));
-  geo.setAttribute('aT5', new THREE.BufferAttribute(T[5], 3));
-  geo.setAttribute('aRand', new THREE.BufferAttribute(AR, 4));
-
-  uniforms = {
-    uState:        { value: 0 },
-    uAssemble:     { value: reduceMotion ? 1 : 0 },
-    uTime:         { value: 0 },
-    uTurbAmp:      { value: reduceMotion ? 0 : 1 },
-    uPixelRatio:   { value: DPR },
-    uSize:         { value: isSmall ? 1.35 : 0.85 },
-    uCursor:       { value: new THREE.Vector3(0, 0, 999) },
-    uCursorForce:  { value: 0 },
-    uCamPos:       { value: new THREE.Vector3() },
-    uHotCenter:    { value: new THREE.Vector3(0, 0, 999) },
-    uHotOn:        { value: 0 },
-    uNeuronA:      { value: neuronA },
-    uNeuronB:      { value: neuronB },
-    uFocus3:       { value: -1 },
-    uFocusAmt:     { value: 0 },
-    uConstCenters: { value: constCenters3 },
-    uConverge:     { value: C[5] },
-    uColBase:      { value: new THREE.Color('#EDEAE4') },
-    uColAct:       { value: new THREE.Color('#E8A33D') },
-  };
-  const mat = new THREE.ShaderMaterial({
-    uniforms, vertexShader: VERT, fragmentShader: FRAG,
-    transparent: true, depthWrite: false, depthTest: true,
-    blending: THREE.AdditiveBlending,
-  });
-  particles = new THREE.Points(geo, mat);
-  particles.frustumCulled = false;
-  scene.add(particles);
-
-  /* faint structural rings receding into fog — the network you travel */
-  {
-    const verts = [];
-    for (let z = -12; z > -466; z -= 21) {
-      const st = Math.min(Math.max(-z / 90, 0), 4.999);
-      const i = Math.floor(st), fz = st - i;
-      const cx = C[i].x + (C[Math.min(i + 1, 5)].x - C[i].x) * fz;
-      const cy = C[i].y + (C[Math.min(i + 1, 5)].y - C[i].y) * fz;
-      const R = 27 + 5 * Math.sin(z * 0.09);
-      const SEG = 64;
-      for (let sgm = 0; sgm < SEG; sgm++) {
-        const a1 = (sgm / SEG) * Math.PI * 2, a2 = ((sgm + 1) / SEG) * Math.PI * 2;
-        verts.push(cx + Math.cos(a1) * R, cy + Math.sin(a1) * R, z,
-                   cx + Math.cos(a2) * R, cy + Math.sin(a2) * R, z);
+  function bootFinish(){
+    if (bootFinished) return;
+    bootFinished = true;
+    // fill in any lines that never arrived (e.g. webgl failure)
+    bootSteps.forEach(function(s){
+      if (!bootDone[s[0]] && linesEl){
+        var d = document.createElement('div');
+        d.innerHTML = '&gt; ' + s[1] + ' <span class="ok">[ SKIP ]</span>';
+        linesEl.appendChild(d);
       }
-    }
-    const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(verts), 3));
-    const m = new THREE.LineBasicMaterial({ color: 0x3a3a3a, transparent: true, opacity: 0.13, depthWrite: false });
-    const rings = new THREE.LineSegments(g, m);
-    rings.frustumCulled = false;
-    scene.add(rings);
-  }
-
-  /* embedding-space connective lines (visible around station 1) */
-  {
-    const rnd = mulberry32(4242);
-    const gs = () => (rnd() + rnd() + rnd() + rnd() - 2) * 0.85;
-    const verts = [];
-    for (let i = 0; i < 260; i++) {
-      const c = clusterCenters1[Math.floor(rnd() * clusterCenters1.length)];
-      verts.push(c.x + gs() * 3.4, c.y + gs() * 3.0, c.z + gs() * 3.0,
-                 c.x + gs() * 3.4, c.y + gs() * 3.0, c.z + gs() * 3.0);
-    }
-    const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(verts), 3));
-    clusterLinesMat = new THREE.LineBasicMaterial({ color: 0xedeae4, transparent: true, opacity: 0, depthWrite: false });
-    clusterLines = new THREE.LineSegments(g, clusterLinesMat);
-    clusterLines.frustumCulled = false;
-    scene.add(clusterLines);
-  }
-
-  /* postprocessing */
-  composer = new EffectComposer(renderer);
-  composer.setPixelRatio(DPR);
-  composer.setSize(innerWidth, innerHeight);
-  composer.addPass(new RenderPass(scene, camera));
-  bloomPass = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.3, 0.55, 0.82);
-  composer.addPass(bloomPass);
-  composer.addPass(new OutputPass());
-  finalPass = new ShaderPass(FinalShader);
-  composer.addPass(finalPass);
-}
-
-/* ============================================================
-   RENDER LOOP
-   ============================================================ */
-const _look = new THREE.Vector3();
-const _pos = new THREE.Vector3();
-const _cursor3 = new THREE.Vector3();
-const _unproj = new THREE.Vector3();
-let usePost = true;
-let clockT = 0, lastTs = 0;
-
-function easeState(s) {
-  const seg = Math.min(Math.floor(s), 4);
-  const f = s - seg;
-  return seg + f * f * (3 - 2 * f); // dwell at stations, glide between
-}
-
-function tick(ts) {
-  const dt = Math.min((ts - lastTs) / 1000 || 0.016, 0.05);
-  lastTs = ts;
-  clockT += dt;
-
-  const raw = rawState();
-  if (reduceMotion) {
-    smState = Math.round(raw);
-    easedState = smState;
-  } else {
-    smState += (raw - smState) * Math.min(1, dt * 6.5);
-    easedState = easeState(smState);
-  }
-
-  if (renderer) {
-    uniforms.uState.value = easedState;
-    uniforms.uTime.value = clockT;
-
-    /* camera along the path */
-    const t = Math.min(Math.max(easedState / 5, 0), 1);
-    camPath.getPoint(t, _pos);
-    const seg = Math.min(Math.floor(easedState), 4);
-    const f = easedState - seg;
-    const sf = f * f * (3 - 2 * f);
-    _look.lerpVectors(C[seg], C[Math.min(seg + 1, 5)], sf);
-    camera.position.set(_pos.x + mouse.x * 1.3, _pos.y - mouse.y * 0.9, _pos.z);
-    camera.lookAt(_look.x + mouse.x * 0.6, _look.y - mouse.y * 0.4, _look.z);
-    uniforms.uCamPos.value.copy(camera.position);
-
-    /* cursor → world-space repulsion point on the focal plane */
-    if (finePointer) {
-      _unproj.set(mouse.x, mouse.y, 0.5).unproject(camera);
-      const dir = _unproj.sub(camera.position).normalize();
-      const dz = _look.z - camera.position.z;
-      if (Math.abs(dir.z) > 0.0001 && dz / dir.z > 0) {
-        _cursor3.copy(camera.position).addScaledVector(dir, dz / dir.z);
-        uniforms.uCursor.value.lerp(_cursor3, 0.2);
-        uniforms.uCursorForce.value += (1 - uniforms.uCursorForce.value) * 0.08;
+    });
+    if (fillEl) fillEl.style.width = '100%';
+    if (pctEl) pctEl.textContent = '100%';
+    var d = document.createElement('div');
+    d.innerHTML = '<span class="ok">sks@portfolio:~$</span> ./enter --void';
+    if (linesEl) linesEl.appendChild(d);
+    pre.classList.add('done');
+    APP.booted = true;
+    var reveal = function(){
+      if (window.gsap && !reduced){
+        gsap.to(pre, { autoAlpha: 0, duration: .55, ease: 'power2.inOut', onComplete: function(){ pre.style.display = 'none'; } });
+      } else {
+        pre.style.display = 'none';
       }
-    }
+      APP.emit('booted');
+    };
+    setTimeout(reveal, reduced ? 80 : 460);
+  }
+  APP.boot = { mark: bootMark, finish: bootFinish };
 
-    /* embedding lines fade in around station 1 */
-    const w1 = 1 - Math.min(1, Math.abs(smState - 1) / 0.8);
-    clusterLinesMat.opacity = w1 * (0.1 + 0.05 * Math.sin(clockT * 0.7));
+  bootMark('dom');
+  if (document.fonts && document.fonts.ready){
+    document.fonts.ready.then(function(){ bootMark('fonts'); });
+  } else { bootMark('fonts'); }
+  // HARD timeout — never hang
+  setTimeout(bootFinish, 8000);
+  // if the 3D module died silently, don't wait the full 8s once UI is alive
+  setTimeout(function(){
+    if (!window.__glReady && !bootFinished){ document.body.classList.add('no-webgl'); bootFinish(); }
+  }, 6500);
 
-    /* transition-reactive aberration + grain drift */
-    const trans = Math.sin(Math.PI * (easedState - Math.floor(easedState))) ** 2;
-    const vel = Math.min(Math.abs(getVelocity()) / 40, 1);
-    finalPass.uniforms.uAberr.value += ((0.004 + trans * 0.045 + vel * 0.02) - finalPass.uniforms.uAberr.value) * 0.1;
-    finalPass.uniforms.uTime.value = clockT;
+  /* ---------- guard: gsap/lenis missing → plain page ---------- */
+  if (!window.gsap || !window.ScrollTrigger || !window.Lenis){
+    document.body.classList.add('no-webgl');
+    bootFinish();
+    return;
+  }
+  gsap.registerPlugin(ScrollTrigger);
 
-    if (usePost) composer.render(); else renderer.render(scene, camera);
+  /* ---------- lenis smooth scroll ---------- */
+  var lenis = null;
+  if (!reduced){
+    lenis = new Lenis({ duration: 1.15, smoothWheel: true });
+    APP.lenis = lenis;
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add(function(t){ lenis.raf(t * 1000); });
+    gsap.ticker.lagSmoothing(0);
   }
 
-  updateHUD();
-  updateTethers();
-  updateCursor(dt);
-  updateAudio();
-  requestAnimationFrame(tick);
-}
+  /* ---------- terminal strip typing engine ---------- */
+  var CMDS = [
+    { path:'~',            cmd:'whoami',                        out:'sulav_kumar_shrestha :: ai-systems-engineer' },
+    { path:'~/about',      cmd:'cd ~/about && cat README.md',   out:'README.md — bio + 4 interests loaded' },
+    { path:'~/experience', cmd:'ls -la ~/experience/',          out:'total 2 :: incorp/  sprhava/' },
+    { path:'~/skills',     cmd:'tree ~/skills/',                out:'4 directories, 24 files, 0 errors' },
+    { path:'~/projects',   cmd:'ls projects/ | head -6',        out:'6 repos :: ★34 combined' },
+    { path:'~/blog',       cmd:'cat ~/blog.md',                 out:'1 featured post :: more on medium' },
+    { path:'~',            cmd:'cat contact.txt',               out:'4 lines — channels open, say hi' }
+  ];
+  var tCmd = document.getElementById('t-cmd');
+  var tPath = document.getElementById('t-path');
+  var tHist = document.getElementById('t-hist');
+  var typeToken = 0, lastTyped = 0;
 
-/* ============================================================
-   HUD
-   ============================================================ */
-const hudLayer = document.getElementById('hud-layer');
-const hudTokens = document.getElementById('hud-tokens');
-const hudLatency = document.getElementById('hud-latency');
-const navLinks = [...document.querySelectorAll('.nav nav a[data-fly]')];
-const navEl = document.getElementById('nav');
-let lastLayer = -1, lastTok = -1;
-
-function updateHUD() {
-  const idx = Math.min(Math.round(smState), 5);
-  if (idx !== lastLayer) {
-    lastLayer = idx;
-    hudLayer.textContent = `LAYER 0${idx + 1} / 06 — ${STATIONS[idx].label}`;
-    navLinks.forEach(a => a.classList.toggle('active', +a.dataset.fly === idx));
-  }
-  const doc = document.documentElement;
-  const max = Math.max(doc.scrollHeight - innerHeight, 1);
-  const tok = Math.round((getScroll() / max) * 8192);
-  if (tok !== lastTok) {
-    lastTok = tok;
-    hudTokens.textContent = `${String(tok).padStart(6, '0')} tokens processed`;
-  }
-  navEl.classList.toggle('scrolled', getScroll() > 40);
-}
-setInterval(() => {
-  const v = 10.5 + Math.random() * 4 + Math.min(Math.abs(getVelocity()) / 6, 14);
-  hudLatency.textContent = `p50 ${v.toFixed(1)}ms`;
-}, 700);
-
-/* ============================================================
-   TETHERS — lines from cards to their scene anchors
-   ============================================================ */
-const tetherSvg = document.getElementById('tethers');
-const expLines = [], projLines = [];
-function makeLine(color, op) {
-  const l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-  l.setAttribute('stroke', color);
-  l.setAttribute('stroke-width', '1');
-  l.setAttribute('pathLength', '1');
-  l.setAttribute('stroke-dasharray', '1');
-  l.setAttribute('stroke-dashoffset', '0');
-  l.style.opacity = '0';
-  l.dataset.op = op;
-  tetherSvg.appendChild(l);
-  return l;
-}
-for (let i = 0; i < 2; i++) expLines.push(makeLine('#E8A33D', 0.5));
-for (let i = 0; i < 6; i++) projLines.push(makeLine('#3A3A3A', 0.55));
-const expCards = [document.getElementById('exp-0'), document.getElementById('exp-1')];
-const projCards = [...document.querySelectorAll('.proj-card')];
-const _proj = new THREE.Vector3();
-
-function toScreen(v) {
-  _proj.copy(v).project(camera);
-  return [(_proj.x * 0.5 + 0.5) * innerWidth, (-_proj.y * 0.5 + 0.5) * innerHeight, _proj.z < 1];
-}
-function updateTethers() {
-  if (!renderer) return;
-  const w2 = 1 - Math.min(1, Math.abs(smState - 2) / 0.7);
-  expLines.forEach((l, i) => {
-    if (w2 <= 0.02 || !expCards[i]) { l.style.opacity = '0'; return; }
-    const [nx, ny, vis] = toScreen(i === 0 ? neuronA : neuronB);
-    const r = expCards[i].getBoundingClientRect();
-    if (!vis || r.bottom < 0 || r.top > innerHeight) { l.style.opacity = '0'; return; }
-    l.setAttribute('x1', i === 0 ? r.right : r.left);
-    l.setAttribute('y1', r.top + r.height / 2);
-    l.setAttribute('x2', nx); l.setAttribute('y2', ny);
-    l.style.opacity = (w2 * l.dataset.op).toFixed(3);
-  });
-  const w4 = 1 - Math.min(1, Math.abs(smState - 4) / 0.7);
-  projLines.forEach((l, i) => {
-    if (w4 <= 0.02) { l.style.opacity = '0'; return; }
-    const [nx, ny, vis] = toScreen(projNodes[i]);
-    const r = projCards[i].getBoundingClientRect();
-    if (!vis || r.bottom < 0 || r.top > innerHeight) { l.style.opacity = '0'; return; }
-    l.setAttribute('x1', r.left + r.width / 2);
-    l.setAttribute('y1', r.top);
-    l.setAttribute('x2', nx); l.setAttribute('y2', ny);
-    l.style.opacity = (w4 * l.dataset.op).toFixed(3);
-  });
-}
-
-/* ============================================================
-   CUSTOM CURSOR — dot + magnetic trailing ring
-   ============================================================ */
-const cursorEl = document.getElementById('cursor');
-const ringEl = document.getElementById('ring');
-const cur = { x: innerWidth / 2, y: innerHeight / 2, rx: innerWidth / 2, ry: innerHeight / 2, scale: 1 };
-let magnetEl = null;
-if (finePointer) {
-  document.documentElement.classList.add('has-cursor');
-  addEventListener('pointermove', (e) => {
-    cur.x = e.clientX; cur.y = e.clientY;
-    mouse.x = (e.clientX / innerWidth) * 2 - 1;
-    mouse.y = -((e.clientY / innerHeight) * 2 - 1);
-  }, { passive: true });
-  document.addEventListener('pointerover', (e) => {
-    magnetEl = e.target.closest && e.target.closest('a, button, .proj-card');
-    ringEl.classList.toggle('hot', !!magnetEl);
-  });
-}
-function updateCursor(dt) {
-  if (!finePointer) return;
-  let tx = cur.x, ty = cur.y, ts = 1;
-  if (magnetEl && magnetEl.isConnected) {
-    const r = magnetEl.getBoundingClientRect();
-    if (r.width < 260 && r.height < 140) {
-      tx = cur.x + ((r.left + r.width / 2) - cur.x) * 0.35;
-      ty = cur.y + ((r.top + r.height / 2) - cur.y) * 0.35;
-    }
-    ts = 1.5;
-  }
-  const k = Math.min(1, dt * 14);
-  cur.rx += (tx - cur.rx) * k;
-  cur.ry += (ty - cur.ry) * k;
-  cur.scale += (ts - cur.scale) * k;
-  cursorEl.style.transform = `translate3d(${cur.x - 2.5}px, ${cur.y - 2.5}px, 0)`;
-  ringEl.style.transform = `translate3d(${cur.rx - 15}px, ${cur.ry - 15}px, 0) scale(${cur.scale.toFixed(3)})`;
-}
-
-/* ============================================================
-   SOUND — generated hum, filter follows scroll velocity
-   ============================================================ */
-const sndBtn = document.getElementById('snd');
-let audioCtx = null, audioFilter = null, audioGain = null, audioOn = false;
-sndBtn.addEventListener('click', () => {
-  if (!audioCtx) {
-    try {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const o1 = audioCtx.createOscillator();
-      const o2 = audioCtx.createOscillator();
-      o1.type = 'sawtooth'; o2.type = 'sawtooth';
-      o1.frequency.value = 54; o2.frequency.value = 54; o2.detune.value = 7;
-      audioFilter = audioCtx.createBiquadFilter();
-      audioFilter.type = 'lowpass';
-      audioFilter.frequency.value = 240;
-      audioFilter.Q.value = 2.5;
-      audioGain = audioCtx.createGain();
-      audioGain.gain.value = 0;
-      o1.connect(audioFilter); o2.connect(audioFilter);
-      audioFilter.connect(audioGain); audioGain.connect(audioCtx.destination);
-      o1.start(); o2.start();
-    } catch (e) { return; }
-  }
-  audioOn = !audioOn;
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-  audioGain.gain.setTargetAtTime(audioOn ? 0.014 : 0, audioCtx.currentTime, 0.4);
-  sndBtn.textContent = audioOn ? 'SND ON' : 'SND OFF';
-  sndBtn.setAttribute('aria-pressed', String(audioOn));
-});
-function updateAudio() {
-  if (!audioOn || !audioFilter) return;
-  const vel = Math.min(Math.abs(getVelocity()), 30);
-  audioFilter.frequency.setTargetAtTime(240 + vel * 38, audioCtx.currentTime, 0.12);
-}
-
-/* ============================================================
-   INTERACTIONS
-   ============================================================ */
-/* nav flight — camera flies along the path, no jump cuts */
-document.querySelectorAll('[data-fly]').forEach(el => {
-  el.addEventListener('click', (e) => {
-    const idx = +el.dataset.fly;
-    const target = sections[idx];
-    if (!target) return;
-    e.preventDefault();
-    const dest = target.offsetTop + target.offsetHeight / 2 - innerHeight / 2;
-    if (lenis) {
-      const dist = Math.abs(dest - getScroll());
-      lenis.scrollTo(dest, {
-        duration: Math.min(1.1 + dist / 2600, 2.8),
-        easing: (x) => 1 - Math.pow(1 - x, 3),
-      });
-    } else {
-      window.scrollTo({ top: dest, behavior: reduceMotion ? 'auto' : 'smooth' });
-    }
-  });
-});
-
-/* interest hover → nearest embedding cluster lights amber */
-document.querySelectorAll('.interests li').forEach(li => {
-  li.addEventListener('mouseenter', () => {
-    if (!uniforms) return;
-    const c = clusterCenters1[+li.dataset.cluster];
-    if (!c) return;
-    uniforms.uHotCenter.value.copy(c);
-    gsap.to(uniforms.uHotOn, { value: 1, duration: 0.5, overwrite: true });
-  });
-  li.addEventListener('mouseleave', () => {
-    if (!uniforms) return;
-    gsap.to(uniforms.uHotOn, { value: 0, duration: 0.7, overwrite: true });
-  });
-});
-
-/* skill hover → its constellation tightens and glows */
-document.querySelectorAll('.skill-group').forEach(group => {
-  group.querySelectorAll('li').forEach(li => {
-    li.addEventListener('mouseenter', () => {
-      if (!uniforms) return;
-      uniforms.uFocus3.value = +group.dataset.group;
-      gsap.to(uniforms.uFocusAmt, { value: 1, duration: 0.5, overwrite: true });
-    });
-    li.addEventListener('mouseleave', () => {
-      if (!uniforms) return;
-      gsap.to(uniforms.uFocusAmt, { value: 0, duration: 0.6, overwrite: true });
-    });
-  });
-});
-
-/* project card 3D tilt */
-if (finePointer && !reduceMotion) {
-  projCards.forEach(card => {
-    const qx = gsap.quickTo(card, 'rotationX', { duration: 0.5, ease: 'power3' });
-    const qy = gsap.quickTo(card, 'rotationY', { duration: 0.5, ease: 'power3' });
-    card.addEventListener('pointermove', (e) => {
-      const r = card.getBoundingClientRect();
-      qx(-((e.clientY - r.top) / r.height - 0.5) * 10);
-      qy(((e.clientX - r.left) / r.width - 0.5) * 12);
-    });
-    card.addEventListener('pointerleave', () => { qx(0); qy(0); });
-  });
-}
-
-/* copy-on-click contact rows */
-const toast = document.getElementById('toast');
-document.querySelectorAll('[data-copy]').forEach(row => {
-  row.addEventListener('click', async () => {
-    const text = row.dataset.copy;
-    let ok = false;
-    try { await navigator.clipboard.writeText(text); ok = true; }
-    catch (e) {
-      const ta = document.createElement('textarea');
-      ta.value = text; document.body.appendChild(ta); ta.select();
-      try { ok = document.execCommand('copy'); } catch (e2) { ok = false; }
-      ta.remove();
-    }
-    if (ok) {
-      gsap.timeline()
-        .to(toast, { opacity: 1, y: 0, duration: 0.25, ease: 'power2.out', startAt: { y: 20 } })
-        .to(toast, { opacity: 0, duration: 0.4, delay: 1.1 });
-    }
-  });
-});
-
-/* ============================================================
-   REVEALS — masked lines, staggered, synced to arrival
-   ============================================================ */
-document.querySelectorAll('.mask').forEach(el => {
-  const inner = document.createElement('span');
-  inner.className = 'mask-inner';
-  while (el.firstChild) inner.appendChild(el.firstChild);
-  el.appendChild(inner);
-});
-
-function revealTween(tl, el, at) {
-  if (el.classList.contains('mask')) {
-    tl.fromTo(el.querySelector('.mask-inner'),
-      { yPercent: 115 }, { yPercent: 0, duration: 1.1, ease: 'power4.out' }, at);
-  } else {
-    tl.fromTo(el, { autoAlpha: 0, y: 34 }, { autoAlpha: 1, y: 0, duration: 1, ease: 'power3.out' }, at);
-  }
-}
-
-function setupReveals() {
-  sections.slice(1).forEach(sec => {
-    const els = [...sec.querySelectorAll('[data-rv]')];
-    if (!els.length) return;
-    if (reduceMotion) {
-      els.forEach(el => gsap.set(el, { autoAlpha: 1 }));
+  function typeCommand(i){
+    if (i === lastTyped) return;
+    lastTyped = i;
+    var spec = CMDS[i];
+    var token = ++typeToken;
+    if (reduced){
+      tCmd.textContent = '';
+      tPath.textContent = spec.path;
+      tHist.innerHTML = '<span>$ ' + spec.cmd + '</span><br><span class="h-out">' + spec.out + '</span>';
       return;
     }
-    els.forEach(el => {
-      if (!el.classList.contains('mask')) gsap.set(el, { autoAlpha: 0, y: 34 });
-      else gsap.set(el.querySelector('.mask-inner'), { yPercent: 115 });
+    tCmd.textContent = '';
+    var chars = spec.cmd.split(''), pos = 0;
+    (function tick(){
+      if (token !== typeToken) return;
+      if (pos < chars.length){
+        tCmd.textContent += chars[pos++];
+        setTimeout(tick, 22 + Math.random() * 48);
+      } else {
+        setTimeout(function(){
+          if (token !== typeToken) return;
+          tHist.innerHTML = '<span>$ ' + spec.cmd + '</span><br><span class="h-out">' + spec.out + '</span>';
+          tCmd.textContent = '';
+          tPath.textContent = spec.path;
+        }, 260);
+      }
+    })();
+  }
+
+  /* ---------- active section tracking ---------- */
+  var navLinks = [].slice.call(document.querySelectorAll('#topnav a[data-sec]'));
+  var secInd = document.getElementById('sec-ind');
+  var secNames = ['~/', '~/about', '~/experience', '~/skills', '~/projects', '~/blog.md', 'contact.txt'];
+  function setActive(i){
+    if (APP.activeIndex === i) return;
+    APP.activeIndex = i;
+    navLinks.forEach(function(a){ a.classList.toggle('active', +a.dataset.sec === i); });
+    if (secInd) secInd.innerHTML = '<b>[0' + (i + 1) + '/07]</b> ' + secNames[i];
+    typeCommand(i);
+    APP.emit('section', i);
+  }
+  secEls.forEach(function(el, i){
+    ScrollTrigger.create({
+      trigger: el, start: 'top 55%', end: 'bottom 55%',
+      onToggle: function(self){ if (self.isActive) setActive(i); }
     });
-    const tl = gsap.timeline({
-      scrollTrigger: { trigger: sec, start: 'top 62%', toggleActions: 'play none none reverse' },
-    });
-    els.forEach((el, i) => revealTween(tl, el, i * 0.09));
   });
-}
 
-function heroReveal() {
-  const els = [...document.querySelectorAll('[data-rv-hero]')];
-  if (reduceMotion) { els.forEach(el => gsap.set(el, { autoAlpha: 1 })); return; }
-  const tl = gsap.timeline({ delay: 0.35 });
-  els.forEach((el, i) => revealTween(tl, el, 0.25 + i * 0.12));
-}
-/* hide hero content until the model has assembled */
-document.querySelectorAll('[data-rv-hero]').forEach(el => {
-  if (!reduceMotion) {
-    if (el.classList.contains('mask')) gsap.set(el.querySelector('.mask-inner'), { yPercent: 115 });
-    else gsap.set(el, { autoAlpha: 0, y: 34 });
-  }
-});
+  /* ---------- nav clicks: cd + smooth scroll ---------- */
+  navLinks.concat([document.querySelector('.nav-brand')]).forEach(function(a){
+    if (!a) return;
+    a.addEventListener('click', function(e){
+      var i = +a.dataset.sec;
+      var target = secEls[i];
+      if (!target) return;
+      e.preventDefault();
+      typeCommand(i);
+      if (lenis){ lenis.scrollTo(target, { duration: 1.5, offset: 0 }); }
+      else { target.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth' }); }
+    });
+  });
 
-/* ============================================================
-   ADAPTIVE QUALITY — probe fps, degrade gracefully
-   ============================================================ */
-function probePerformance() {
-  if (!renderer) return;
-  let frames = 0, start = performance.now();
-  function count() {
-    frames++;
-    const elapsed = performance.now() - start;
-    if (elapsed < 1600) { requestAnimationFrame(count); return; }
-    const fps = frames / (elapsed / 1000);
-    if (fps < 45) {
-      particles.geometry.setDrawRange(0, Math.floor(N / 2));
-      usePost = false;
-      renderer.setPixelRatio(1);
-      renderer.setSize(innerWidth, innerHeight);
-    }
-  }
-  requestAnimationFrame(count);
-}
-
-/* ============================================================
-   BOOT
-   ============================================================ */
-let started = false;
-function startExperience() {
-  if (started) return;
-  started = true;
-  computeCenters();
-  setupReveals();
-  heroReveal();
-  if (renderer && !reduceMotion) {
-    gsap.to(uniforms.uAssemble, { value: 1, duration: 1.8, ease: 'power2.inOut' });
-  }
-  probePerformance();
-}
-
-async function boot() {
-  setProgress(0.05);
-  try { await document.fonts.load('400 212px "Instrument Serif"'); } catch (e) { /* sample with fallback serif */ }
-  try { await document.fonts.ready; } catch (e) { /* non-fatal */ }
-  setProgress(0.35);
-
-  if (webgl) {
-    const namePts = sampleName();
-    setProgress(0.5);
-    initScene(namePts);
-    setProgress(0.7);
-    try { await renderer.compileAsync(scene, camera); } catch (e) { /* compile on first frame instead */ }
-    setProgress(0.92);
+  /* ---------- reveals ---------- */
+  var rvs = gsap.utils.toArray('.rv');
+  if (reduced){
+    // leave everything visible
   } else {
-    setProgress(0.9);
+    rvs.forEach(function(el){
+      gsap.from(el, {
+        y: 30, autoAlpha: 0, duration: .8, ease: 'power3.out',
+        scrollTrigger: { trigger: el, start: 'top 90%', once: true }
+      });
+    });
+    gsap.set('.hv', { y: 26, autoAlpha: 0 });
+    APP.on('booted', function(){
+      gsap.to('.hv', { y: 0, autoAlpha: 1, duration: .9, stagger: .09, ease: 'power3.out', delay: .1 });
+    });
+  }
+  if (reduced){ APP.on('booted', function(){}); }
+
+  /* ---------- HUD fake stats ---------- */
+  var t0 = Date.now();
+  var hudUp = document.getElementById('hud-up'), hudLoad = document.getElementById('hud-load'), hudMem = document.getElementById('hud-mem');
+  var load = [0.42, 0.38, 0.35], mem = 412;
+  function pad(n){ return (n < 10 ? '0' : '') + n; }
+  setInterval(function(){
+    if (!hudUp) return;
+    var s = Math.floor((Date.now() - t0) / 1000);
+    hudUp.textContent = pad(Math.floor(s / 3600)) + ':' + pad(Math.floor(s / 60) % 60) + ':' + pad(s % 60);
+    load[0] = Math.min(2.4, Math.max(0.08, load[0] + (Math.random() - 0.5) * 0.22));
+    load[1] += (load[0] - load[1]) * 0.3; load[2] += (load[1] - load[2]) * 0.2;
+    hudLoad.textContent = load.map(function(v){ return v.toFixed(2); }).join(' ');
+    mem = Math.min(1900, Math.max(256, mem + Math.round((Math.random() - 0.48) * 30)));
+    hudMem.textContent = mem + 'M / 2048M';
+  }, 1000);
+
+  /* ---------- custom block cursor ---------- */
+  if (finePointer && !reduced){
+    document.body.classList.add('cursor-on');
+    var cur = document.getElementById('cursor');
+    var cx = -100, cy = -100, tx = -100, ty = -100;
+    window.addEventListener('pointermove', function(e){ tx = e.clientX; ty = e.clientY; }, { passive: true });
+    gsap.ticker.add(function(){
+      cx += (tx - cx) * 0.35; cy += (ty - cy) * 0.35;
+      cur.style.transform = 'translate(' + (cx - (cur.classList.contains('hov') ? 13 : 6)) + 'px,' + (cy - (cur.classList.contains('hov') ? 13 : 6)) + 'px)';
+    });
+    document.addEventListener('pointerover', function(e){
+      cur.classList.toggle('hov', !!(e.target.closest && e.target.closest('a, button, .skill-cat')));
+    });
   }
 
-  computeCenters();
-  requestAnimationFrame(tick);
-  requestAnimationFrame(() => {
-    setProgress(1);
-    finishPreloader(startExperience);
+  /* ---------- skills hover → 3D glow bridge ---------- */
+  [].slice.call(document.querySelectorAll('.skill-cat')).forEach(function(el){
+    el.addEventListener('mouseenter', function(){ APP.emit('skillhover', +el.dataset.cat); });
+    el.addEventListener('mouseleave', function(){ APP.emit('skillhover', -1); });
   });
+
+  window.addEventListener('load', function(){ ScrollTrigger.refresh(); });
+})();
+</script>
+
+<!-- ============ 3D SCENE (module) ============ -->
+<script type="module">
+import * as THREE from 'three';
+
+const APP = window.APP;
+const reduced = APP.reduced;
+let renderer;
+
+try {
+  init();
+} catch (err) {
+  console.error('[gl] init failed:', err);
+  document.body.classList.add('no-webgl');
+  window.__glFailed = true;
+  if (APP && APP.boot) APP.boot.finish();
 }
 
-addEventListener('resize', () => {
-  computeCenters();
-  ScrollTrigger.refresh();
-  if (!renderer) return;
-  camera.aspect = innerWidth / innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight);
-  composer.setSize(innerWidth, innerHeight);
-});
+function init(){
+  const canvas = document.getElementById('glcanvas');
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
+  const DPR = Math.min(window.devicePixelRatio || 1, 1.75);
+  renderer.setPixelRatio(DPR);
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  window.__glReady = true;
+  APP.boot.mark('ctx');
 
-boot();
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x030303);
+  scene.fog = new THREE.FogExp2(0x030303, 0.036);
+
+  const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 200);
+  camera.position.set(0, 0.4, 10.5);
+
+  /* ---------- lights ---------- */
+  scene.add(new THREE.HemisphereLight(0xa8a89c, 0x11110e, 1.35));
+  const key = new THREE.DirectionalLight(0xf2f2e6, 3.0);
+  key.position.set(-6, 9, 6);
+  scene.add(key);
+  const fill = new THREE.DirectionalLight(0xd8d8cc, 0.9);
+  fill.position.set(7, -4, -3);
+  scene.add(fill);
+  const camLight = new THREE.PointLight(0x4af626, 9, 20, 1.9); // phosphor rim riding with camera
+  scene.add(camLight);
+
+  /* ---------- concrete texture ---------- */
+  function concreteTexture(){
+    const c = document.createElement('canvas'); c.width = c.height = 256;
+    const g = c.getContext('2d');
+    g.fillStyle = '#8f8f88'; g.fillRect(0, 0, 256, 256);
+    const img = g.getImageData(0, 0, 256, 256);
+    for (let i = 0; i < img.data.length; i += 4){
+      const n = (Math.random() - 0.5) * 34;
+      img.data[i] += n; img.data[i+1] += n; img.data[i+2] += n;
+    }
+    g.putImageData(img, 0, 0);
+    // hairline cracks
+    g.strokeStyle = 'rgba(30,30,28,.5)'; g.lineWidth = 1;
+    for (let k = 0; k < 7; k++){
+      g.beginPath();
+      let x = Math.random() * 256, y = Math.random() * 256;
+      g.moveTo(x, y);
+      for (let s = 0; s < 5; s++){ x += (Math.random() - .5) * 90; y += (Math.random() - .5) * 90; g.lineTo(x, y); }
+      g.stroke();
+    }
+    const t = new THREE.CanvasTexture(c);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    return t;
+  }
+  const concTex = concreteTexture();
+  const concrete = new THREE.MeshStandardMaterial({ color: 0xbcbcae, map: concTex, roughness: 0.92, metalness: 0.02 });
+  const edgeMat = new THREE.LineBasicMaterial({ color: 0x4af626, transparent: true, opacity: 0.5 });
+
+  function labelMaterial(text){
+    const c = document.createElement('canvas'); c.width = 512; c.height = 320;
+    const g = c.getContext('2d');
+    g.fillStyle = '#0c0c0a'; g.fillRect(0, 0, 512, 320);
+    g.strokeStyle = '#4af626'; g.lineWidth = 6; g.strokeRect(14, 14, 484, 292);
+    g.fillStyle = '#4af626';
+    g.font = '700 84px "JetBrains Mono", monospace';
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText(text, 256, 150);
+    g.font = '400 30px "JetBrains Mono", monospace';
+    g.fillStyle = '#5a5a52';
+    g.fillText('drwxr-xr-x', 256, 236);
+    const t = new THREE.CanvasTexture(c);
+    return new THREE.MeshStandardMaterial({ map: t, roughness: 0.85, emissive: 0x2a6e12, emissiveMap: t, emissiveIntensity: 0.9 });
+  }
+
+  const floaters = []; // {mesh, phase, amp}
+  function slab(w, h, d, x, y, z, ry, parent){
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), concrete);
+    m.position.set(x, y, z);
+    m.rotation.y = ry || 0;
+    const e = new THREE.LineSegments(new THREE.EdgesGeometry(m.geometry), edgeMat);
+    m.add(e);
+    (parent || scene).add(m);
+    floaters.push({ mesh: m, phase: Math.random() * Math.PI * 2, amp: 0.10 + Math.random() * 0.12, baseY: y });
+    return m;
+  }
+
+  /* ---------- section waypoints & set dressing ---------- */
+  // [targetX,Y,Z] camera looks here; camOff = camera offset from target
+  const WAY = [
+    { t: [ 1.4,  0.1,    0], o: [ 0.0, 0.4, 10.5] },  // hero
+    { t: [-0.8,  0.0,  -22], o: [-1.4, 0.3,  9.5] },  // about
+    { t: [ 0.8,  0.2,  -44], o: [ 0.9, 0.6, 11.0] },  // experience
+    { t: [-0.8, -0.1,  -66], o: [-0.7, 0.0,  9.0] },  // skills
+    { t: [ 0.8,  0.1,  -88], o: [ 0.6, 0.7, 11.5] },  // projects
+    { t: [-0.9,  0.1, -100], o: [-0.6, 0.4,  9.5] },  // blog
+    { t: [ 0.0,  0.0, -110], o: [ 0.0, 0.2,  9.0] }   // contact
+  ];
+
+  // HERO — monolith right of frame + two shards
+  slab(3.0, 6.6, 0.7,  3.4, 0.1, -0.5, -0.38);
+  slab(1.1, 2.2, 0.35, 5.9, -1.6, -3.5, 0.4);
+  slab(0.8, 0.8, 0.8, -4.6, 2.6, -5.0, 0.6);
+
+  // ABOUT — big slab + orbiting satellites
+  const aboutMain = slab(5.4, 3.4, 0.5, -0.8, 0, -23.5, 0.16);
+  const sats = [];
+  for (let i = 0; i < 4; i++){
+    const s = slab(0.7, 0.7, 0.7, 0, 0, -23.5, Math.random());
+    sats.push({ m: s, a: i / 4 * Math.PI * 2, r: 4.2 + i * 0.45, sp: 0.12 + i * 0.03 });
+  }
+
+  // EXPERIENCE — two carved tablets
+  slab(3.1, 4.5, 0.5, -1.3, 0.2, -45.5, 0.12);
+  slab(3.1, 4.5, 0.5,  3.0, 0.1, -46.5, -0.18);
+
+  // SKILLS — rotating cluster of labeled plates
+  const skGroup = new THREE.Group();
+  skGroup.position.set(-0.8, 1.1, -67.5);
+  scene.add(skGroup);
+  const skLabels = ['LANG', 'AI/ML', 'LLM', 'INFRA'];
+  const skPlates = [];
+  skLabels.forEach((txt, i) => {
+    const lm = labelMaterial(txt);
+    const side = concrete;
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(2.3, 1.45, 0.22),
+      [side, side, side, side, lm, lm]);
+    const a = i / 4 * Math.PI * 2;
+    mesh.position.set(Math.cos(a) * 2.5, Math.sin(a * 2) * 0.9, Math.sin(a) * 2.5);
+    mesh.rotation.y = -a;
+    const e = new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry), edgeMat);
+    mesh.add(e);
+    skGroup.add(mesh);
+    skPlates.push({ mesh, lm });
+  });
+  APP.on('skillhover', (idx) => {
+    skPlates.forEach((p, i) => {
+      const on = i === idx;
+      p.lm.emissiveIntensity = on ? 2.2 : 0.9;
+    });
+  });
+
+  // PROJECTS — six staggered slabs
+  for (let i = 0; i < 6; i++){
+    const col = i % 3, row = Math.floor(i / 3);
+    slab(2.2, 1.4, 0.2,
+      -2.6 + col * 3.1 + (row ? 0.9 : 0),
+      1.5 - row * 2.6 + (col % 2) * 0.5,
+      -90 - (i % 3) * 1.6,
+      (Math.random() - .5) * 0.4);
+  }
+
+  // BLOG — reading slab tilted like an open ledger
+  slab(4.2, 2.5, 0.45, -0.9, 0.2, -100.8, 0.14);
+  slab(0.9, 0.9, 0.9,  2.8, -1.4, -102.6, 0.5);
+
+  // CONTACT — final slab + beacon cube
+  slab(4.6, 2.7, 0.5, 0, 0.1, -111.8, 0.05);
+  const beacon = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5),
+    new THREE.MeshStandardMaterial({ color: 0x0c0c0a, emissive: 0x4af626, emissiveIntensity: 2.6, roughness: .6 }));
+  beacon.position.set(3.2, 1.6, -110.6);
+  scene.add(beacon);
+
+  // VOID DEBRIS — distant context slabs so transits are never empty
+  for (let i = 0; i < 14; i++){
+    const side = i % 2 ? 1 : -1;
+    slab(1.2 + Math.random() * 2.4, 1.8 + Math.random() * 3.6, 0.3 + Math.random() * 0.3,
+      side * (9.5 + Math.random() * 7),
+      -5 + Math.random() * 10,
+      6 - Math.random() * 122,
+      Math.random() * 1.2 - 0.6);
+  }
+
+  APP.boot.mark('slabs');
+
+  /* ---------- dust motes (buffer points) ---------- */
+  const DUST_N = 1400;
+  const dustGeo = new THREE.BufferGeometry();
+  const pos = new Float32Array(DUST_N * 3);
+  const seed = new Float32Array(DUST_N);
+  for (let i = 0; i < DUST_N; i++){
+    pos[i*3]   = (Math.random() - .5) * 30;
+    pos[i*3+1] = (Math.random() - .5) * 18;
+    pos[i*3+2] = 14 - Math.random() * 140;
+    seed[i] = Math.random() * 100;
+  }
+  dustGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  dustGeo.setAttribute('aSeed', new THREE.BufferAttribute(seed, 1));
+  const dustMat = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+    uniforms: { uTime: { value: 0 }, uPx: { value: 3.4 * DPR } },
+    vertexShader: `
+      attribute float aSeed;
+      uniform float uTime;
+      uniform float uPx;
+      varying float vA;
+      void main(){
+        vec3 p = position;
+        p.x += sin(uTime * 0.07 + aSeed * 13.7) * 0.9;
+        p.y += sin(uTime * 0.05 + aSeed * 7.3) * 0.7;
+        vec4 mv = modelViewMatrix * vec4(p, 1.0);
+        float d = -mv.z;
+        gl_PointSize = clamp(uPx * (9.0 / d), 1.0, 5.0);
+        vA = (0.16 + 0.34 * fract(aSeed * 0.37)) * smoothstep(30.0, 4.0, d) ;
+        gl_Position = projectionMatrix * mv;
+      }`,
+    fragmentShader: `
+      precision mediump float;
+      varying float vA;
+      void main(){
+        vec2 q = gl_PointCoord - 0.5;
+        float m = smoothstep(0.5, 0.12, length(q));
+        gl_FragColor = vec4(vec3(0.62, 0.95, 0.55), vA * m);
+      }`
+  });
+  const dust = new THREE.Points(dustGeo, dustMat);
+  dust.frustumCulled = false;
+  scene.add(dust);
+
+  /* ---------- ASCII post pass ---------- */
+  let rt = new THREE.WebGLRenderTarget(1, 1);
+  const postScene = new THREE.Scene();
+  const postCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+  const postMat = new THREE.ShaderMaterial({
+    uniforms: {
+      tDiffuse: { value: rt.texture },
+      uResolution: { value: new THREE.Vector2(1, 1) },
+      uCell: { value: Math.max(6, Math.round(8 * DPR)) },
+      uMix: { value: 1.0 },
+      uTime: { value: 0 }
+    },
+    vertexShader: `
+      varying vec2 vUv;
+      void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`,
+    fragmentShader: `
+      precision highp float;
+      uniform sampler2D tDiffuse;
+      uniform vec2 uResolution;
+      uniform float uCell;
+      uniform float uMix;
+      uniform float uTime;
+      varying vec2 vUv;
+      // movAX13h 5x5 bitmap glyphs packed in floats
+      float character(float n, vec2 p){
+        p = floor(p * vec2(-4.0, 4.0) + 2.5);
+        if (clamp(p.x, 0.0, 4.0) == p.x && clamp(p.y, 0.0, 4.0) == p.y){
+          float k = p.x + 5.0 * p.y;
+          if (int(mod(n / exp2(k), 2.0)) == 1) return 1.0;
+        }
+        return 0.0;
+      }
+      void main(){
+        vec2 frag = vUv * uResolution;
+        vec2 cellId = floor(frag / uCell);
+        vec2 cUv = (cellId + 0.5) * uCell / uResolution;
+        vec3 col = texture2D(tDiffuse, cUv).rgb;
+        float g = dot(col, vec3(0.299, 0.587, 0.114));
+        g = pow(g * 1.35, 0.62);
+        float n = 0.0;
+        if (g > 0.045) n = 4096.0;      // .
+        if (g > 0.115) n = 65600.0;     // :
+        if (g > 0.205) n = 332772.0;    // *
+        if (g > 0.310) n = 15255086.0;  // o
+        if (g > 0.425) n = 23385164.0;  // &
+        if (g > 0.550) n = 15252014.0;  // 8
+        if (g > 0.680) n = 13199452.0;  // @
+        if (g > 0.820) n = 11512810.0;  // #
+        vec2 p = mod(frag / (uCell * 0.5), 2.0) - vec2(1.0);
+        float ch = character(n, p);
+        vec3 raw = texture2D(tDiffuse, vUv).rgb;
+        vec3 tint = mix(col, col * vec3(0.72, 1.12, 0.66), 0.45);
+        vec3 ascii = tint * ch * 2.0 + raw * 0.14;
+        vec3 outc = mix(raw, ascii, uMix);
+        // subtle CRT
+        outc *= 0.955 + 0.045 * sin(frag.y * 3.14159);
+        vec2 q = vUv - 0.5;
+        outc *= 1.0 - dot(q, q) * 0.62;
+        gl_FragColor = vec4(outc, 1.0);
+      }`
+  });
+  const tri = new THREE.BufferGeometry();
+  tri.setAttribute('position', new THREE.BufferAttribute(new Float32Array([-1,-1,0, 3,-1,0, -1,3,0]), 3));
+  tri.setAttribute('uv', new THREE.BufferAttribute(new Float32Array([0,0, 2,0, 0,2]), 2));
+  const postMesh = new THREE.Mesh(tri, postMat);
+  postMesh.frustumCulled = false;
+  postScene.add(postMesh);
+  const fxParam = new URLSearchParams(location.search).get('fx');
+  let asciiOn = fxParam !== 'off';
+  let probeStage = fxParam ? 2 : 0; // ?fx=ascii|off pins the pipeline (testing/preference)
+  APP.boot.mark('shader');
+
+  /* ---------- resize ---------- */
+  let vw = 0, vh = 0, aspect = 1, fitBoost = 1;
+  function resize(){
+    vw = window.innerWidth; vh = window.innerHeight;
+    aspect = vw / vh;
+    fitBoost = aspect < 1.05 ? 1 + (1.05 - aspect) * 1.05 : 1; // pull camera back on portrait
+    camera.aspect = aspect;
+    camera.updateProjectionMatrix();
+    renderer.setSize(vw, vh);
+    const dw = Math.floor(vw * DPR), dh = Math.floor(vh * DPR);
+    rt.setSize(dw, dh);
+    postMat.uniforms.uResolution.value.set(dw, dh);
+    computeAnchors();
+  }
+  window.addEventListener('resize', resize);
+
+  /* ---------- scroll → camera path ---------- */
+  let anchors = [0, 1, 2, 3, 4, 5];
+  function computeAnchors(){
+    const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    anchors = APP.sections.map((el) => {
+      const r = el.offsetTop + el.offsetHeight / 2 - window.innerHeight / 2;
+      return Math.min(Math.max(r, 0), max);
+    });
+    anchors[0] = 0;
+    anchors[anchors.length - 1] = max;
+  }
+  const v3a = new THREE.Vector3(), v3b = new THREE.Vector3();
+  const camTarget = new THREE.Vector3(), camPos = new THREE.Vector3();
+  let mx = 0, my = 0;
+  if (window.matchMedia('(pointer: fine)').matches && !reduced){
+    window.addEventListener('pointermove', (e) => {
+      mx = (e.clientX / vw - 0.5) * 2;
+      my = (e.clientY / vh - 0.5) * 2;
+    }, { passive: true });
+  }
+  function smooth(t){ return t * t * (3 - 2 * t); }
+
+  function updateCamera(){
+    const y = APP.getScroll();
+    let i = 0;
+    while (i < anchors.length - 2 && y > anchors[i + 1]) i++;
+    const span = Math.max(1, anchors[i + 1] - anchors[i]);
+    let t = smooth(Math.min(Math.max((y - anchors[i]) / span, 0), 1));
+    if (reduced){ t = t < 0.5 ? 0 : 1; }
+    const A = WAY[i], B = WAY[Math.min(i + 1, WAY.length - 1)];
+    v3a.fromArray(A.t); v3b.fromArray(B.t);
+    camTarget.lerpVectors(v3a, v3b, t);
+    v3a.set(A.t[0] + A.o[0], A.t[1] + A.o[1], A.t[2] + A.o[2] * fitBoost);
+    v3b.set(B.t[0] + B.o[0], B.t[1] + B.o[1], B.t[2] + B.o[2] * fitBoost);
+    camPos.lerpVectors(v3a, v3b, t);
+    // lateral bulge so the camera swings AROUND slabs instead of through them
+    const bulge = Math.sin(t * Math.PI);
+    camPos.x += (i % 2 ? -4.4 : 4.4) * bulge;
+    camPos.y += 1.1 * bulge;
+    camPos.x += mx * 0.45; camPos.y += -my * 0.3;
+    camera.position.copy(camPos);
+    camera.lookAt(camTarget);
+    camLight.position.copy(camPos).z -= 2.5;
+  }
+
+  /* ---------- render loop ---------- */
+  const clock = new THREE.Clock();
+  let firstFrame = false;
+  let frames = 0, probeT = 0;
+  function loop(){
+    requestAnimationFrame(loop);
+    const dt = Math.min(clock.getDelta(), 0.1);
+    const t = clock.elapsedTime;
+
+    if (!reduced){
+      dustMat.uniforms.uTime.value = t;
+      skGroup.rotation.y += dt * 0.22;
+      floaters.forEach((f) => { f.mesh.position.y = f.baseY + Math.sin(t * 0.4 + f.phase) * f.amp; });
+      sats.forEach((s) => {
+        s.a += dt * s.sp;
+        s.m.position.set(-0.8 + Math.cos(s.a) * s.r, Math.sin(s.a * 1.7) * 1.4, -23.5 + Math.sin(s.a) * s.r * 0.6);
+      });
+      beacon.rotation.x += dt * 0.6; beacon.rotation.y += dt * 0.8;
+      postMat.uniforms.uTime.value = t;
+    }
+    updateCamera();
+
+    if (asciiOn){
+      renderer.setRenderTarget(rt);
+      renderer.render(scene, camera);
+      renderer.setRenderTarget(null);
+      renderer.render(postScene, postCam);
+    } else {
+      renderer.render(scene, camera);
+    }
+
+    if (!firstFrame){ firstFrame = true; APP.boot.mark('frame'); }
+
+    // FPS probe → degrade gracefully
+    if (APP.booted && probeStage < 2){
+      frames++; probeT += dt;
+      if (probeT >= 3){
+        const fps = frames / probeT;
+        if (probeStage === 0 && fps < 38){
+          asciiOn = false;
+          console.warn('[gl] degrade: ascii pass off (fps=' + fps.toFixed(1) + ')');
+        } else if (probeStage === 1 && fps < 30){
+          dustGeo.setDrawRange(0, Math.floor(DUST_N / 3));
+          console.warn('[gl] degrade: dust reduced (fps=' + fps.toFixed(1) + ')');
+        }
+        window.__fps = fps;
+        frames = 0; probeT = 0; probeStage++;
+      }
+    }
+    window.__state = { asciiOn, booted: APP.booted, active: APP.activeIndex };
+  }
+
+  resize();
+  computeAnchors();
+  window.addEventListener('load', computeAnchors);
+  setTimeout(computeAnchors, 1200);
+  loop();
+}
 </script>
 </body>
 </html>
